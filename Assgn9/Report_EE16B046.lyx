@@ -1,0 +1,1592 @@
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 7page%
+\topmargin 5pheight%
+\rightmargin 7page%
+\bottommargin 5pheight%
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\listings_params "language=Python,basicstyle={\ttfamily},keywordstyle={\color{blue}},commentstyle={\color{magenta}\itshape},breaklines=true,stringstyle={\color{green}}"
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Report - Assignment 9
+\end_layout
+
+\begin_layout Author
+Akshay Anand (EE16B046)
+\end_layout
+
+\begin_layout Abstract
+In this week's assignment, the digital fourier transform of some given functions
+ were found out using python functions for obtaining the same like 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$numpy.fft.fft()$
+\end_layout
+
+\end_inset
+
+.
+ Then, the values found by this function were normalized to their actual
+ numerical values using 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$numpy.fft.fftshift()$
+\end_layout
+
+\end_inset
+
+, after which the phase and magnitude plots of the resulting transforms
+ were plotted.
+\end_layout
+
+\begin_layout Section*
+Libraries Used
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+import numpy as np
+\end_layout
+
+\begin_layout Plain Layout
+
+from numpy import fft as f
+\end_layout
+
+\begin_layout Plain Layout
+
+import matplotlib.pyplot as plt
+\end_layout
+
+\begin_layout Plain Layout
+
+import math
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Prerequisite Functions Defined
+\end_layout
+
+\begin_layout Subsection
+Function to calculate the DFT
+\end_layout
+
+\begin_layout Standard
+The following function, when given a mathematical function, calculates the
+ DFT of that function and returns this calculated value.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+vspace{5pt}$
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+def calc_fft(func, steps):
+\end_layout
+
+\begin_layout Plain Layout
+
+    ''' The parameters for this function:
+\end_layout
+
+\begin_layout Plain Layout
+
+        func - The python function, which returns the calculated values
+ for the mathematical function for which DFT is to be calculated.
+\end_layout
+
+\begin_layout Plain Layout
+
+        steps - The number of steps taken in the time interval.
+\end_layout
+
+\begin_layout Plain Layout
+
+    '''
+\end_layout
+
+\begin_layout Plain Layout
+
+    x=np.linspace(-8*math.pi,8*math.pi,steps+1);
+\end_layout
+
+\begin_layout Plain Layout
+
+    x=x[:-1]
+\end_layout
+
+\begin_layout Plain Layout
+
+    y=func(x)
+\end_layout
+
+\begin_layout Plain Layout
+
+    Y=f.fftshift(f.fft(f.ifftshift(y)))/steps
+\end_layout
+
+\begin_layout Plain Layout
+
+    return Y
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Function to plot the graphs
+\end_layout
+
+\begin_layout Standard
+The function defined below, takes the parameters, as mentioned in the docstring,
+ and plots the phase and magnitude plot of the passed DFT of some function.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+vspace{5pt}$
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+def plot_fft(Y,x_lim,y_lim,function,steps,offset,show_data_points):
+\end_layout
+
+\begin_layout Plain Layout
+
+    ''' The parameters accepted by the function to do the plotting:
+\end_layout
+
+\begin_layout Plain Layout
+
+         Y - The DFT of the function, to be plotted, whose magnitude and
+ phase constitute the 2 plots.
+\end_layout
+
+\begin_layout Plain Layout
+
+         x_lim - The magnitude of maximum frequency to be shown in both
+ the plots.
+\end_layout
+
+\begin_layout Plain Layout
+
+         y_lim - The magnitude of maximum phase to be shown in the phase
+ plot.
+\end_layout
+
+\begin_layout Plain Layout
+
+         function - The function to be plottes (in string form to show in
+ graph)
+\end_layout
+
+\begin_layout Plain Layout
+
+         steps - No.
+ of steps to take for the frequency array.
+\end_layout
+
+\begin_layout Plain Layout
+
+         offset - The maximum offset for the labels in the graph.
+\end_layout
+
+\begin_layout Plain Layout
+
+         show_data_points - A boolean, for displaying the data values in
+ the graph.
+\end_layout
+
+\begin_layout Plain Layout
+
+    '''
+\end_layout
+
+\begin_layout Plain Layout
+
+    w=np.linspace(-64,64,steps+1)
+\end_layout
+
+\begin_layout Plain Layout
+
+    w = w[:-1]
+\end_layout
+
+\begin_layout Plain Layout
+
+    ctr = 0
+\end_layout
+
+\begin_layout Plain Layout
+
+    fig, axes = plt.subplots(2, 1, figsize=(15, 7), sharex = True)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+    plt.suptitle("The DFT plots for " + function, fontsize=18)
+\end_layout
+
+\begin_layout Plain Layout
+
+    # The magnitude plot is plotted
+\end_layout
+
+\begin_layout Plain Layout
+
+    axes[0].plot(w,abs(Y),lw=2)
+\end_layout
+
+\begin_layout Plain Layout
+
+    if show_data_points:
+\end_layout
+
+\begin_layout Plain Layout
+
+        for xy in zip(w, abs(Y)):
+\end_layout
+
+\begin_layout Plain Layout
+
+            if xy[1] > 1e-3:
+\end_layout
+
+\begin_layout Plain Layout
+
+                axes[0].annotate('(%s, %s)' % xy, xy=xy, textcoords='data')
+ # To mark the points where the impulse occurs
+\end_layout
+
+\begin_layout Plain Layout
+
+    axes[0].set_xlim([-x_lim,x_lim])
+\end_layout
+
+\begin_layout Plain Layout
+
+    axes[0].set_ylabel(r"$|Y|$",size=16)
+\end_layout
+
+\begin_layout Plain Layout
+
+    axes[0].set_title("Spectrum of " + function, fontsize=14)
+\end_layout
+
+\begin_layout Plain Layout
+
+    axes[0].grid(True)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+    # The phase plot is plotted
+\end_layout
+
+\begin_layout Plain Layout
+
+    ii=np.where(abs(Y)>1e-3)
+\end_layout
+
+\begin_layout Plain Layout
+
+    axes[1].plot(w[ii],np.angle(Y[ii]),'go',lw=2)
+\end_layout
+
+\begin_layout Plain Layout
+
+    if show_data_points:
+\end_layout
+
+\begin_layout Plain Layout
+
+        for xy in zip(w[ii], np.angle(Y[ii])):                          
+             
+\end_layout
+
+\begin_layout Plain Layout
+
+            axes[1].annotate('(%0.2f, %0.2f)' % xy, xy=(xy[0],xy[1]+((-1)**ctr)*off
+set), textcoords='data')    # To mark the phase at which the impulse occurs
+\end_layout
+
+\begin_layout Plain Layout
+
+            ctr = ctr + 1
+\end_layout
+
+\begin_layout Plain Layout
+
+    axes[1].set_xlim([-x_lim,x_lim])
+\end_layout
+
+\begin_layout Plain Layout
+
+    axes[1].set_ylim([-y_lim,y_lim])
+\end_layout
+
+\begin_layout Plain Layout
+
+    axes[1].set_ylabel(r"Phase of $Y$",size=16)
+\end_layout
+
+\begin_layout Plain Layout
+
+    axes[1].set_title("Phase Plot of " + function, fontsize=14)
+\end_layout
+
+\begin_layout Plain Layout
+
+    axes[1].set_xlabel(r"$k$",size=16)
+\end_layout
+
+\begin_layout Plain Layout
+
+    axes[1].grid(True)
+\end_layout
+
+\begin_layout Plain Layout
+
+    plt.show()
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Plots of some simple functions
+\end_layout
+
+\begin_layout Standard
+In this section, the transform plots of some simple functions are done so
+ as to verify the functioning of the python plots, to see if the plots correspon
+d to the expected transforms of these functions, after which, more complicated
+ functions' plots would plotted.
+\end_layout
+
+\begin_layout Subsection
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+sin{5t}$
+\end_layout
+
+\end_inset
+
+ spectrum
+\end_layout
+
+\begin_layout Standard
+One of the simplest functions available, 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+sin{5t}$
+\end_layout
+
+\end_inset
+
+ is used, and its digital fourier transform plots (magnitude and phase)
+ are plotted.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+def f1(x):    # The python function representing sin(5t) is declared.
+\end_layout
+
+\begin_layout Plain Layout
+
+    return np.sin(5*x)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+no_of_steps = 1024
+\end_layout
+
+\begin_layout Plain Layout
+
+Y = calc_fft(f1, no_of_steps)   # calc_fft is called to calculate and return
+ the calculated DFT.
+\end_layout
+
+\begin_layout Plain Layout
+
+plot_fft(Y,10,5,r"$
+\backslash
+sin(5t)$",no_of_steps,0)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The output plot obtained is:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename sin_5t.png
+	scale 55
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+vspace{5pt}$
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Thus, from the plots, it is seen that the impulse occurs at frequencies
+ of +5 and -5, as expected as the input sine wave has a frequency of 5.
+ Also, the phase at these points are 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$+
+\backslash
+frac{
+\backslash
+pi}{2}$
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$-
+\backslash
+frac{
+\backslash
+pi}{2}$
+\end_layout
+
+\end_inset
+
+, which is also expected, as the complex representation of 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+sin(5t)$
+\end_layout
+
+\end_inset
+
+ is 
+\begin_inset Formula 
+\[
+\sin\left(5t\right)=\frac{e^{j5t}}{2j}-\frac{e^{-j5t}}{2j}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+where, both elements are purely imaginary, with opposite signs and a magnitude
+ of 0.5.
+ Thus, the calculated graph is verified.
+\end_layout
+
+\begin_layout Subsection
+\begin_inset Formula $\left(1+0.1\cos\left(t\right)\right)\cos\left(10t\right)$
+\end_inset
+
+ spectrum
+\end_layout
+
+\begin_layout Standard
+In this example, spectrum of the the amplitude modulated wave 
+\begin_inset Formula $\left(1+0.1\cos\left(t\right)\right)\cos\left(10t\right)$
+\end_inset
+
+ is plotted, which is a slightly more complicated function than the one
+ plotted above, and its obtained graphs are verified.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+def f2(x):
+\end_layout
+
+\begin_layout Plain Layout
+
+    return (1 + 0.1*np.cos(x))*np.cos(10*x)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+no_of_steps = 1024
+\end_layout
+
+\begin_layout Plain Layout
+
+Y = calc_fft(f2, no_of_steps)
+\end_layout
+
+\begin_layout Plain Layout
+
+plot_fft(Y,12,5,r"$(1+0.1
+\backslash
+cos(t))
+\backslash
+cos(10t)$",no_of_steps,0.5)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The output plot is:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename ex_2.png
+	scale 55
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The complex representation of 
+\begin_inset Formula 
+\[
+f\left(t\right)=\left(1+0.1\cos\left(t\right)\right)\cos\left(10t\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+is
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+f\left(t\right)=0.5\left(e^{j10t}+e^{-j10t}\right)+0.025\left(e^{j11t}+e^{-j11t}+e^{j9t}+e^{-j9t}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Thus, from the plots, it is seen that, all the phases are 0, which is expected,
+ as only positive real coefficients are there in the complex representation,
+ which occurs at frequencies of -9,-10,-11,9,10 and 11.
+ Also, from the magnitude plot, it is confirmed that the coefficients of
+ the 11 and 9 frequency components are indeed 0.025 and that of 10 is 0.5,
+ according to the equation.
+\end_layout
+
+\begin_layout Subsection
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+sin^3(t)$
+\end_layout
+
+\end_inset
+
+ Spectrum
+\end_layout
+
+\begin_layout Standard
+In this, the spectrum of 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+sin^3(t)$
+\end_layout
+
+\end_inset
+
+ is plotted and the graphs obtained are verified.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+def f3(x): 
+\end_layout
+
+\begin_layout Plain Layout
+
+    return np.sin(x)**3
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+no_of_steps = 1024
+\end_layout
+
+\begin_layout Plain Layout
+
+Y = calc_fft(f3, no_of_steps)
+\end_layout
+
+\begin_layout Plain Layout
+
+plot_fft(Y,12,5,r"$
+\backslash
+sin^3(t)$",no_of_steps,0.5)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The graphs obtained are:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename sin^3(t).png
+	scale 55
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The complex representation of 
+\begin_inset Formula 
+\[
+f\left(t\right)=\sin^{3}\left(t\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+is
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+f\left(t\right)=-j\left(0.375\left(e^{jt}-e^{-jt}\right)-0.125\left(e^{j3t}-e^{-j3t}\right)\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+using the formula 
+\begin_inset Formula $\sin(3t)=3\sin(t)-4\sin^{3}(t)$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+Thus, the observation from the graph is verified by the formula, in that,
+ the magnitude of the peak at 3 and -3 are 0.125, and those at 1 and -1 are
+ 0.375.
+ Also, the phase at frequencies of -1 and 3 are 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$+
+\backslash
+frac{
+\backslash
+pi}{2}$
+\end_layout
+
+\end_inset
+
+, while those at -3 and 1 are 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$-
+\backslash
+frac{
+\backslash
+pi}{2}$
+\end_layout
+
+\end_inset
+
+, which also can be observed in the formula, as the coefficients of these
+ terms are 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$+j$
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$-j$
+\end_layout
+
+\end_inset
+
+, respectively, when the equation is expanded.
+\end_layout
+
+\begin_layout Subsection
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+cos^3(t)$
+\end_layout
+
+\end_inset
+
+ Spectrum
+\end_layout
+
+\begin_layout Standard
+In this, the spectrum of 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+cos^3(t)$
+\end_layout
+
+\end_inset
+
+ is plotted and the graphs obtained are verified.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+def f4(x): 
+\end_layout
+
+\begin_layout Plain Layout
+
+    return np.cos(x)**3
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+no_of_steps = 1024
+\end_layout
+
+\begin_layout Plain Layout
+
+Y = calc_fft(f4, no_of_steps)
+\end_layout
+
+\begin_layout Plain Layout
+
+plot_fft(Y,12,5,r"$
+\backslash
+cos^3(t)$",no_of_steps,0.5)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The graphs obtained are:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename cos^3(t).png
+	scale 55
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Thus, similar to the previous example, the complex representation of 
+\begin_inset Formula 
+\[
+f\left(t\right)=\cos^{3}\left(t\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+is
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+f\left(t\right)=0.375\left(e^{jt}+e^{-jt}\right)+0.125\left(e^{j3t}+e^{-j3t}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+using the formula 
+\begin_inset Formula $\cos(3t)=4\cos^{3}(t)-3\cos(t)$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+Thus, the observation from the graph is verified by the formula, in that,
+ the magnitude of the peak at 3 and -3 are 0.125, and those at 1 and -1 are
+ 0.375.
+ Also, the phase at all frequencies (-1, 1, -3 and 3) are 0, which can also
+ be observed from the formula, as the coefficients of all these terms are
+ positive real numbers.
+\end_layout
+
+\begin_layout Section
+Plots of more complex functions
+\end_layout
+
+\begin_layout Standard
+From the above plots, we have verified that what 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$numpy.fft.fft()$
+\end_layout
+
+\end_inset
+
+ returns actually matches the expected output that we predicted using the
+ actual DFT formulas.
+ So, in this section, the python fft is used to compute the fft of some
+ more complex functions, from which some observations are made.
+\end_layout
+
+\begin_layout Subsection
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+cos(20t + 5
+\backslash
+cos(t))$
+\end_layout
+
+\end_inset
+
+ transform
+\end_layout
+
+\begin_layout Standard
+In this section, the DFT plots for the Frequency modulated wave: 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+cos(20t + 5
+\backslash
+cos(t))$
+\end_layout
+
+\end_inset
+
+ is drawn, and the observations are noted.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+def f5(x):
+\end_layout
+
+\begin_layout Plain Layout
+
+    return np.cos(20*x + 5*np.cos(x))
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+Y = calc_fft(f5, no_of_steps)
+\end_layout
+
+\begin_layout Plain Layout
+
+plot_fft(Y,40,5,r"$
+\backslash
+cos(20t + 5
+\backslash
+cos(t))$",no_of_steps,0,False)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The output obtained is:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename FM.png
+	scale 55
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Thus, it can be seen that, in this example of a frequency modulated wave,
+ the amplitude corresponding to each frequency, follows the amplitude curve
+ of a bessel function from -30, with an initial rise at around -24, minima
+ at around -22 reaching the median value at the centre frequency of -20
+ and following a mirror image path to -10.
+ The same is followed in the Right Half Plane also, as the actual function
+ is still a cosine wave, and therefore, the LHP and RHP have the same graphs.
+\end_layout
+
+\begin_layout Standard
+In the phase plot, though, instead of getting the same phase diagrams, as
+ other cosine waves in the 2 halves, the one on the right is the negative
+ of the reflection along -20 line of the one on the left.
+ This is because of the 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$5
+\backslash
+cos(t)$
+\end_layout
+
+\end_inset
+
+ term in the phase of the original expression.
+ This term can go to both positive and negative and therefore the phase
+ will revolve around the central frequency of 20, as given by the first
+ term in the phase 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$20t$
+\end_layout
+
+\end_inset
+
+.
+ Also, when the complex representation of the equation is taken, then sign
+ of 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$5
+\backslash
+cos(t)$
+\end_layout
+
+\end_inset
+
+ would be opposite for both terms.
+ Thus, the reflection around k = 20 is justified.
+ The reflection around the phase = 0 line for the RHP diagram, as compared
+ to the LHP diagram, can be attributed to the fact that, when the initial
+ function is written in its complex form, the frequency of the first term
+ would be 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$20t + 5
+\backslash
+cos(t)$
+\end_layout
+
+\end_inset
+
+, whereas that of second would be negative of this.
+ Thus, the entire phase is negative in the RHP, and therefore, the phase
+ graph is as seen above.
+\end_layout
+
+\begin_layout Subsection
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$e^{
+\backslash
+frac{-t^2}{2}}$
+\end_layout
+
+\end_inset
+
+ transform
+\end_layout
+
+\begin_layout Standard
+In this, the transform of the gaussian - 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$e^{
+\backslash
+frac{-t^2}{2}}$
+\end_layout
+
+\end_inset
+
+, is found out.
+ This is also expected to be a gaussian itself, with different scaling.
+ For the input gaussian as:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+f\left(t\right)=e^{\frac{-t^{2}}{2}}
+\]
+
+\end_inset
+
+the fourier transform is also a gaussian, represented by:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\mathscr{F}_{t}\left[e^{\frac{-t^{2}}{2}}\right]\left(\omega\right)=\frac{1}{\sqrt{2\pi}}e^{-2\omega^{2}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+So, the values obtained via 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$numpy.fft.fft$
+\end_layout
+
+\end_inset
+
+ compared with one obtained with this formula, and the maximum error is
+ computed.
+ For this, another calc_fft() function is declared.
+ This is because, for this case, the scaling factor, to be multiplied with
+ Y is different, as this is a non-periodic function.
+ So, only the no.
+ of steps in a single period of 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$0$ to $2
+\backslash
+pi$
+\end_layout
+
+\end_inset
+
+ is to be divided.
+ So, in this particular case, that is the 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+frac{1}{4^{th}}$
+\end_layout
+
+\end_inset
+
+ of the total number of steps.
+ Also, here the interval is also different (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$-4
+\backslash
+pi, 4
+\backslash
+pi$
+\end_layout
+
+\end_inset
+
+), rather than (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$-8
+\backslash
+pi, 8
+\backslash
+pi$
+\end_layout
+
+\end_inset
+
+), as was done for the other functions.
+ This is so as to scale the output of the python computed fft correctly,
+ so as to match with the actual transform of the function.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+def calc_fft_2(func, steps):
+\end_layout
+
+\begin_layout Plain Layout
+
+    x=np.linspace(-4*math.pi,4*math.pi,steps+1);
+\end_layout
+
+\begin_layout Plain Layout
+
+    x=x[:-1]
+\end_layout
+
+\begin_layout Plain Layout
+
+    y=func(x)
+\end_layout
+
+\begin_layout Plain Layout
+
+    Y=f.fftshift(f.fft(f.ifftshift(y)))/(steps/4)
+\end_layout
+
+\begin_layout Plain Layout
+
+    return Y
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+def gauss(w):
+\end_layout
+
+\begin_layout Plain Layout
+
+    return np.sqrt(1/(2*math.pi))*np.exp(-(w**2)*2) 
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+def f6(x):
+\end_layout
+
+\begin_layout Plain Layout
+
+    return np.exp(-(x*x)/2)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+no_of_steps=1024
+\end_layout
+
+\begin_layout Plain Layout
+
+Y = calc_fft_2(f6, no_of_steps)
+\end_layout
+
+\begin_layout Plain Layout
+
+w=np.linspace(-64,64,no_of_steps+1)
+\end_layout
+
+\begin_layout Plain Layout
+
+w = w[:-1]
+\end_layout
+
+\begin_layout Plain Layout
+
+print ("The maximum error between the expected and calculated gaussians
+ are ", max(np.absolute(gauss(w) - Y)))
+\end_layout
+
+\begin_layout Plain Layout
+
+plot_fft(Y,10,5,r"$e^{
+\backslash
+frac{-t^2}{2}}$",no_of_steps,0,False)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Here, the output obtained is:
+\end_layout
+
+\begin_layout LyX-Code
+The maximum error between the expected and calculated gaussians are  1.8049052731
+7e-15
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename exp.png
+	scale 55
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Thus, it is proved from the graph, that the resulting transform is also
+ a gaussian, with all phases as 0, as it is also only a real valued gaussian,
+ with no imaginary components.
+ It also matches very closely with the expected gaussian, as the maximum
+ error that is returned is of the order of 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$10^{-15}$
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section
+Conclusion
+\end_layout
+
+\begin_layout Standard
+Thus, from the initial plots, we verified the fourier transform that was
+ calculated by python using 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$numpy.fft.fft$
+\end_layout
+
+\end_inset
+
+, as matching the expected ones, for those functions.
+ Then, the python function was used to calculate the fourier transforms
+ of more complex functions like gaussian and a frequency modulated wave,
+ for which, calculating their actual expressions are difficult.
+ So, this obtained fourier transform was analysed and verified with the
+ known properties of the signal.
+\end_layout
+
+\end_body
+\end_document

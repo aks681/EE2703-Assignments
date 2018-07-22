@@ -1,0 +1,1396 @@
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 7page%
+\topmargin 5pheight%
+\rightmargin 7page%
+\bottommargin 5pheight%
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Report - Assignment 3
+\end_layout
+
+\begin_layout Author
+- Akshay Anand (EE16B046)
+\end_layout
+
+\begin_layout Abstract
+In this week's assignment, the fourier coefficients of two functions (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+exp(x)$
+\end_layout
+
+\end_inset
+
+ & 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+cos(
+\backslash
+cos(x))$
+\end_layout
+
+\end_inset
+
+) over the interval 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$0$
+\end_layout
+
+\end_inset
+
+ to 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$2
+\backslash
+pi$
+\end_layout
+
+\end_inset
+
+ were calculated using the integral definition of the fourier coefficients
+ (integrated using scipy.integrate.quad) as well as by least square fitting
+ (using numpy.linalg.lstsq).
+ These two coefficients were first plotted together.
+ The properties of the graphs obtained were noted (both in semilog-y axis
+ and loglog axis).
+ Then, the coefficients obtained through least square estimation were used
+ to calcuate the values of the functions and this was plotted alongside
+ the actual values of the functions and the difference was noted.
+\end_layout
+
+\begin_layout Abstract
+Formula for fourier series used:
+\begin_inset Formula 
+\[
+f\left(x\right)=a_{0}+\sum_{n=1}^{\infty}\left\{ a_{n}\cos\left(nx\right)+b_{n}\sin\left(nx\right)\right\} 
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+Libraries Used
+\end_layout
+
+\begin_layout LyX-Code
+import numpy as np
+\end_layout
+
+\begin_layout LyX-Code
+import matplotlib.pyplot as plt
+\end_layout
+
+\begin_layout LyX-Code
+from numpy.linalg import lstsq
+\end_layout
+
+\begin_layout LyX-Code
+import math
+\end_layout
+
+\begin_layout LyX-Code
+from scipy.integrate import quad
+\end_layout
+
+\begin_layout LyX-Code
+plt.style.use('ggplot')
+\end_layout
+
+\begin_layout Section
+Function Definition
+\end_layout
+
+\begin_layout Standard
+The two functions whose fourier coefficients are to be calculated are defined
+ in a python function.
+\end_layout
+
+\begin_layout LyX-Code
+def f1(x):
+\end_layout
+
+\begin_layout LyX-Code
+    return np.exp(x)
+\end_layout
+
+\begin_layout LyX-Code
+def f2(x):
+\end_layout
+
+\begin_layout LyX-Code
+    return np.cos(np.cos(x))
+\end_layout
+
+\begin_layout Standard
+The above defined functions are then plotted in the interval 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$[-2
+\backslash
+pi,4
+\backslash
+pi)$
+\end_layout
+
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout LyX-Code
+x = np.linspace(-2*math.pi, 4*math.pi, 400)
+\end_layout
+
+\begin_layout LyX-Code
+plt.semilogy(x, f1(x),'r')   # exp(x) is plotted in a semilog axis.
+\end_layout
+
+\begin_layout LyX-Code
+plt.title('Semilog plot of exp(x)') 
+\end_layout
+
+\begin_layout LyX-Code
+plt.xlabel('x
+\backslash
+nFigure 1')
+\end_layout
+
+\begin_layout LyX-Code
+plt.ylabel('log plot of $e^{x}$')
+\end_layout
+
+\begin_layout LyX-Code
+plt.show()
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename exp_x.png
+	scale 60
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout LyX-Code
+plt.plot(x, f2(x), 'g')  # cos(cos(x)) is plotted in a linear axis.
+\end_layout
+
+\begin_layout LyX-Code
+plt.title('Plot of cos(cos(x))') 
+\end_layout
+
+\begin_layout LyX-Code
+plt.xlabel('x')
+\end_layout
+
+\begin_layout LyX-Code
+plt.ylabel('cos(cos(x))')
+\end_layout
+
+\begin_layout LyX-Code
+plt.show()
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename cos_cosx.png
+	scale 60
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+From the graph, it is found that 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+cos(
+\backslash
+cos(x))$
+\end_layout
+
+\end_inset
+
+ is periodic whereas 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+exp(x)$
+\end_layout
+
+\end_inset
+
+ is not.
+\end_layout
+
+\begin_layout Section
+Fourier coefficients using integration
+\end_layout
+
+\begin_layout Standard
+First, the functions to integrate according to the integral equations are
+ defined.
+\end_layout
+
+\begin_layout Standard
+The integration equations used:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+a_{0}=\frac{1}{2\pi}\int_{0}^{2\pi}f\left(x\right)dx
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+a_{n}=\frac{1}{\pi}\int_{0}^{2\pi}f\left(x\right)\cos\left(nx\right)dx
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+b_{n}=\frac{1}{\pi}\int_{0}^{2\pi}f\left(x\right)\sin\left(nx\right)dx
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout LyX-Code
+def uf1(x, k):      # an calculation for f1
+\end_layout
+
+\begin_layout LyX-Code
+    return np.exp(x)*np.cos(k*x)
+\end_layout
+
+\begin_layout LyX-Code
+def vf1(x, k):      # bn calculation for f1
+\end_layout
+
+\begin_layout LyX-Code
+    return np.exp(x)*np.sin(k*x)
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vspace{5pt}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout LyX-Code
+def uf2(x, k):      # an calculation for f2
+\end_layout
+
+\begin_layout LyX-Code
+    return np.cos(np.cos(x))*np.cos(k*x)
+\end_layout
+
+\begin_layout LyX-Code
+def vf2(x, k):      # bn calculation for f2
+\end_layout
+
+\begin_layout LyX-Code
+    return np.cos(np.cos(x))*np.sin(k*x)
+\end_layout
+
+\begin_layout Standard
+Now, the loop to actually integrate the above functions and get the first
+ 51 coefficients for the 2 functions are defined.
+\end_layout
+
+\begin_layout LyX-Code
+n = np.arange(1,52)
+\end_layout
+
+\begin_layout LyX-Code
+f1Coeff = []     #List of all the coefficients
+\end_layout
+
+\begin_layout LyX-Code
+af1 = []         #List of only an
+\end_layout
+
+\begin_layout LyX-Code
+bf1 = []         #List of only bn
+\end_layout
+
+\begin_layout LyX-Code
+f1Coeff.append(quad(f1, 0, 2*math.pi)[0] / (2*math.pi))   #Calculate a0 for
+ f1
+\end_layout
+
+\begin_layout LyX-Code
+af1.append(f1Coeff[0])
+\end_layout
+
+\begin_layout LyX-Code
+for k in range(1,26):
+\end_layout
+
+\begin_layout LyX-Code
+    f1Coeff.append(quad(uf1, 0, 2*math.pi, args = (k))[0] / (math.pi))  #Calculate
+ an for f1
+\end_layout
+
+\begin_layout LyX-Code
+    af1.append(quad(uf1, 0, 2*math.pi, args = (k))[0] / (math.pi))
+\end_layout
+
+\begin_layout LyX-Code
+    f1Coeff.append(quad(vf1, 0, 2*math.pi, args = (k))[0] / (math.pi))  #Calculate
+ bn for f1
+\end_layout
+
+\begin_layout LyX-Code
+    bf1.append(quad(vf1, 0, 2*math.pi, args = (k))[0] / (math.pi))
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vspace{5pt}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout LyX-Code
+f2Coeff = []     #List of all the coefficients
+\end_layout
+
+\begin_layout LyX-Code
+af2 = []         #List of only an
+\end_layout
+
+\begin_layout LyX-Code
+bf2 = []         #List of only bn
+\end_layout
+
+\begin_layout LyX-Code
+f2Coeff.append(quad(f2, 0, 2*math.pi)[0] / (2*math.pi))  #Calculate a0 for
+ f2
+\end_layout
+
+\begin_layout LyX-Code
+af2.append(f2Coeff[0])
+\end_layout
+
+\begin_layout LyX-Code
+for k in range(1,26):
+\end_layout
+
+\begin_layout LyX-Code
+    f2Coeff.append(quad(uf2, 0, 2*math.pi, args = (k))[0] / (math.pi))  #Calculate
+ an for f2
+\end_layout
+
+\begin_layout LyX-Code
+    af2.append(quad(uf2, 0, 2*math.pi, args = (k))[0] / (math.pi))
+\end_layout
+
+\begin_layout LyX-Code
+    f2Coeff.append(quad(vf2, 0, 2*math.pi, args = (k))[0] / (math.pi))  #Calculate
+ bn for f2
+\end_layout
+
+\begin_layout LyX-Code
+    bf2.append(quad(vf2, 0, 2*math.pi, args = (k))[0] / (math.pi))
+\end_layout
+
+\begin_layout Section
+Comparing plots
+\end_layout
+
+\begin_layout Standard
+The magnitude of fourier coefficients of both functions are plotted in a
+ semilog plot as well as a log log plot and the properties of the graph
+ obtained are noted.
+\end_layout
+
+\begin_layout LyX-Code
+plt.semilogy(n, np.absolute(f1Coeff), 'ro')
+\end_layout
+
+\begin_layout LyX-Code
+plt.title('Semilog plot of coefficients of exp(x)')
+\end_layout
+
+\begin_layout LyX-Code
+plt.xlabel('n
+\backslash
+nFigure 3')
+\end_layout
+
+\begin_layout LyX-Code
+plt.ylabel('f1Coeff')
+\end_layout
+
+\begin_layout LyX-Code
+plt.show()
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename exp_x_semilog.png
+	scale 60
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vspace{10pt}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout LyX-Code
+plt.loglog(n, np.absolute(f1Coeff), 'ro')
+\end_layout
+
+\begin_layout LyX-Code
+plt.title('Log log plot of coefficients of exp(x)')
+\end_layout
+
+\begin_layout LyX-Code
+plt.xlabel('n
+\backslash
+nFigure 4')
+\end_layout
+
+\begin_layout LyX-Code
+plt.ylabel('f1Coeff')
+\end_layout
+
+\begin_layout LyX-Code
+plt.show()
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename exp_x_loglog.png
+	scale 60
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vspace{15pt}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout LyX-Code
+plt.semilogy(n, np.absolute(f2Coeff), 'ro')
+\end_layout
+
+\begin_layout LyX-Code
+plt.title('Semilog plot of coefficients of cos(cos(x))')
+\end_layout
+
+\begin_layout LyX-Code
+plt.xlabel('n
+\backslash
+nFigure 5')
+\end_layout
+
+\begin_layout LyX-Code
+plt.ylabel('f2Coeff')
+\end_layout
+
+\begin_layout LyX-Code
+plt.show()
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename cos_cosx_semilog.png
+	scale 60
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vspace{10pt}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout LyX-Code
+plt.loglog(n, np.absolute(f2Coeff), 'ro')
+\end_layout
+
+\begin_layout LyX-Code
+plt.title('Log log plot of coefficients of cos(cos(x))')
+\end_layout
+
+\begin_layout LyX-Code
+plt.xlabel('n
+\backslash
+nFigure 6')
+\end_layout
+
+\begin_layout LyX-Code
+plt.ylabel('f2Coeff')
+\end_layout
+
+\begin_layout LyX-Code
+plt.show()
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename cos_cosx_loglog.png
+	scale 60
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Least Squares Approximation of coefficients
+\end_layout
+
+\begin_layout Standard
+The vector 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$x$
+\end_layout
+
+\end_inset
+
+ is initialised from 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$0$
+\end_layout
+
+\end_inset
+
+ to 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$2
+\backslash
+pi$
+\end_layout
+
+\end_inset
+
+ in 400 steps and the actual value of the functions are evaluated at eaxh
+ of these points and stored in a vector 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$b$
+\end_layout
+
+\end_inset
+
+.
+ Then the 2D matrix in the matrix equivalent of the following equation is
+ initialised and the value of the coefficients are obtained through solving
+ the resulting matrix equation by least squares estimation.
+\begin_inset Formula 
+\[
+a_{0}+\sum_{n=1}^{25}a_{n}\cos\left(nx_{i}\right)+\sum_{n=1}^{25}b_{n}\sin\left(nx_{i}\right)≈f\left(x_{i}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout LyX-Code
+x=np.linspace(0,2*math.pi,401)   # vector x is initialised
+\end_layout
+
+\begin_layout LyX-Code
+x=x[:-1]
+\end_layout
+
+\begin_layout LyX-Code
+b1=f1(x)                         # b1 is used to store actual value of f1
+ at all points in x
+\end_layout
+
+\begin_layout LyX-Code
+b2=f2(x)                         # b2 is used to store actual value of f2
+ at all points in x 
+\end_layout
+
+\begin_layout LyX-Code
+A=np.zeros((400,51)) # The 2D matrix is initialised and assigned values in
+ the following lines
+\end_layout
+
+\begin_layout LyX-Code
+A[:,0]=1
+\end_layout
+
+\begin_layout LyX-Code
+for k in range(1,26):
+\end_layout
+
+\begin_layout LyX-Code
+    A[:,2*k-1]=np.cos(k*x)
+\end_layout
+
+\begin_layout LyX-Code
+    A[:,2*k]=np.sin(k*x)
+\end_layout
+
+\begin_layout LyX-Code
+c1=lstsq(A,b1)[0]                # The coefficients of f1 is estimated using
+ lstsq
+\end_layout
+
+\begin_layout LyX-Code
+c2=lstsq(A,b2)[0]                # The coefficients of f2 is estimated using
+ lstsq
+\end_layout
+
+\begin_layout Section
+Plotting coefficients
+\end_layout
+
+\begin_layout Standard
+The coefficients obtained using least squares approach is plotted alongside
+ the coefficients obtained using integration using green dots in Figures
+ 3,4,5 & 6.
+\end_layout
+
+\begin_layout LyX-Code
+plt.semilogy(n, np.absolute(f1Coeff), 'ro')
+\end_layout
+
+\begin_layout LyX-Code
+plt.semilogy(n, np.absolute(c1), 'go')
+\end_layout
+
+\begin_layout LyX-Code
+plt.title('Semilog plot of coefficients of exp(x)')
+\end_layout
+
+\begin_layout LyX-Code
+plt.legend(('Integration method', 'Least square estimation'))
+\end_layout
+
+\begin_layout LyX-Code
+plt.xlabel('n
+\backslash
+nFigure 3')
+\end_layout
+
+\begin_layout LyX-Code
+plt.ylabel('f1Coeff')
+\end_layout
+
+\begin_layout LyX-Code
+plt.show()
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename exp_x_semilog2.png
+	scale 60
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout LyX-Code
+plt.loglog(n, np.absolute(f1Coeff), 'ro')
+\end_layout
+
+\begin_layout LyX-Code
+plt.loglog(n, np.absolute(c1), 'go')
+\end_layout
+
+\begin_layout LyX-Code
+plt.title('Log log plot of coefficients of exp(x)')
+\end_layout
+
+\begin_layout LyX-Code
+plt.legend(('Integration method', 'Least square estimation'))
+\end_layout
+
+\begin_layout LyX-Code
+plt.xlabel('n
+\backslash
+nFigure 4')
+\end_layout
+
+\begin_layout LyX-Code
+plt.ylabel('f1Coeff')
+\end_layout
+
+\begin_layout LyX-Code
+plt.show()
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename exp_x_loglog2.png
+	scale 60
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout LyX-Code
+plt.semilogy(n, np.absolute(f2Coeff), 'ro')
+\end_layout
+
+\begin_layout LyX-Code
+plt.semilogy(n, np.absolute(c2), 'go')
+\end_layout
+
+\begin_layout LyX-Code
+plt.title('Semilog plot of coefficients of cos(cos(x))')
+\end_layout
+
+\begin_layout LyX-Code
+plt.legend(('Integration method', 'Least square estimation'))
+\end_layout
+
+\begin_layout LyX-Code
+plt.xlabel('n
+\backslash
+nFigure 5')
+\end_layout
+
+\begin_layout LyX-Code
+plt.ylabel('f2Coeff')
+\end_layout
+
+\begin_layout LyX-Code
+plt.show()
+\end_layout
+
+\begin_layout LyX-Code
+\begin_inset Graphics
+	filename cos_cosx_semilog2.png
+	scale 60
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout LyX-Code
+plt.loglog(n, np.absolute(f2Coeff), 'ro')
+\end_layout
+
+\begin_layout LyX-Code
+plt.loglog(n, np.absolute(c2), 'go')
+\end_layout
+
+\begin_layout LyX-Code
+plt.title('Log log plot of coefficients of cos(cos(x))')
+\end_layout
+
+\begin_layout LyX-Code
+plt.legend(('Integration method', 'Least square estimation'))
+\end_layout
+
+\begin_layout LyX-Code
+plt.xlabel('n
+\backslash
+nFigure 6')
+\end_layout
+
+\begin_layout LyX-Code
+plt.ylabel('f2Coeff')
+\end_layout
+
+\begin_layout LyX-Code
+plt.show()
+\end_layout
+
+\begin_layout LyX-Code
+\begin_inset Graphics
+	filename cos_cosx_loglog2.png
+	scale 60
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The maximum deviation of the calculated coefficients to the estimated coefficien
+ts are then found out.
+\end_layout
+
+\begin_layout LyX-Code
+print ("The maximum deviation between coefficients are -")
+\end_layout
+
+\begin_layout LyX-Code
+print ("exp(x) :", max(np.absolute(c1-f1Coeff)))
+\end_layout
+
+\begin_layout LyX-Code
+print ("cos(cos(x)) :", max(np.absolute(c2-f2Coeff)))
+\end_layout
+
+\begin_layout Standard
+The output was found to be: 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+
+\backslash
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The maximum deviation between coefficients are -
+\end_layout
+
+\begin_layout Standard
+exp(x) : 1.33273087034
+\end_layout
+
+\begin_layout Standard
+cos(cos(x)) : 2.57586713575e-15
+\end_layout
+
+\begin_layout Section
+Compare actual and computed values of functions
+\end_layout
+
+\begin_layout Standard
+From the first 51 fourier coefficients that were calculated using least
+ squares estimation, the value of the functions in the interval is calculated
+ and plotted alongside the actual value of the function in that interval.
+\end_layout
+
+\begin_layout LyX-Code
+plt.plot(x, np.matmul(A,c1), 'go')
+\end_layout
+
+\begin_layout LyX-Code
+plt.plot(x, f1(x), 'b')
+\end_layout
+
+\begin_layout LyX-Code
+plt.title('Linear plot of exp(x)') 
+\end_layout
+
+\begin_layout LyX-Code
+plt.legend(('Calculated Value', 'Actual value'))
+\end_layout
+
+\begin_layout LyX-Code
+plt.xlabel('n
+\backslash
+nFigure 1')
+\end_layout
+
+\begin_layout LyX-Code
+plt.ylabel('exp(x)')
+\end_layout
+
+\begin_layout LyX-Code
+plt.show()   # Compares the linear plot of exp(x)
+\end_layout
+
+\begin_layout LyX-Code
+plt.semilogy(x, np.matmul(A,c1), 'go')
+\end_layout
+
+\begin_layout LyX-Code
+plt.semilogy(x, f1(x), 'b')
+\end_layout
+
+\begin_layout LyX-Code
+plt.title('Semilog plot of exp(x)')
+\end_layout
+
+\begin_layout LyX-Code
+plt.legend(('Calculated Value', 'Actual value'))
+\end_layout
+
+\begin_layout LyX-Code
+plt.xlabel('n
+\backslash
+nFigure 1')
+\end_layout
+
+\begin_layout LyX-Code
+plt.ylabel('exp(x)')
+\end_layout
+
+\begin_layout LyX-Code
+plt.show()  # Compares the semilog plot of exp(x)
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename exp_x_linear_final.png
+	scale 60
+
+\end_inset
+
+ 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+hspace{7pt}
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename exp_x_semilog_final.png
+	scale 60
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout LyX-Code
+plt.plot(x, np.matmul(A,c2), 'go')
+\end_layout
+
+\begin_layout LyX-Code
+plt.plot(x, f2(x), 'b')
+\end_layout
+
+\begin_layout LyX-Code
+plt.title('Plot of cos(cos(x))')
+\end_layout
+
+\begin_layout LyX-Code
+plt.legend(('Calculated Value', 'Actual value'))
+\end_layout
+
+\begin_layout LyX-Code
+plt.xlabel('n
+\backslash
+nFigure 2')
+\end_layout
+
+\begin_layout LyX-Code
+plt.ylabel('cos(cos(x))')
+\end_layout
+
+\begin_layout LyX-Code
+plt.show()
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename cos_cosx_final.png
+	scale 60
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Results and Inferences
+\end_layout
+
+\begin_layout Enumerate
+From the initial graphs of Figures 3,4,5 and 6, it is observed that:
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+The 
+\begin_inset Formula $b_{n}$
+\end_inset
+
+ coefficients in the second function are nearly 0 as the function 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+cos(
+\backslash
+cos(x))$
+\end_layout
+
+\end_inset
+
+ is an even function and therefore depends more strongly on the cosine component
+ of the fourier series (which is even) than the sine component (which is
+ odd).
+ Hence the sine coefficients (
+\begin_inset Formula $b_{n}$
+\end_inset
+
+) are nearly 0.
+\end_layout
+
+\begin_layout Enumerate
+The coefficients of 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+exp(x)$
+\end_layout
+
+\end_inset
+
+ will depend on higher frequencies also as it is not a periodic function
+ and therefore to estimate it, even to a reasonable accuracy, a large number
+ of high frequency components would also be required whereas 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+cos(
+\backslash
+cos(x))$
+\end_layout
+
+\end_inset
+
+ is a periodic function as well as sinusoidal in nature and therefore can
+ be estimated accurately even with low frequency components and hence the
+ latter's coefficients decay quickly with 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$n$
+\end_layout
+
+\end_inset
+
+ whereas the former's does not.
+\end_layout
+
+\begin_layout Enumerate
+The coefficients of 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+exp(x)$
+\end_layout
+
+\end_inset
+
+ is of the form 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$n^a$
+\end_layout
+
+\end_inset
+
+ and therefore looks linear only in a loglog plot whereas that of 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+cos(
+\backslash
+cos(x))$
+\end_layout
+
+\end_inset
+
+ is of the form 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+exp(a)$
+\end_layout
+
+\end_inset
+
+ and therefore looks linear in a semilog plot.
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+From the final graphs - Figures 3,4,5 and 6, we see that coefficients found
+ using the two methods don't agree and they shouldn't also.
+ This is because the ones calculated using integration are the actual values
+ (with minimal error inherent in the quad function) whereas for calculating
+ using least square estimation, the actual values of the functions were
+ equated with the fourier series expansion containing just the first 25
+ terms of each summation and therefore compounding this error with the one
+ inherent in least square approximation, we get coefficients that deviate
+ from the actual values.
+\end_layout
+
+\begin_layout Enumerate
+From the final graphs of Figures 1 and 2, we see that there is significant
+ deviation in Figure 1 whereas almost no deviation in Figure 2.
+ This is because, as mentioned earlier, as 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+exp(x)$
+\end_layout
+
+\end_inset
+
+ is not periodic, it depends on higher frequencies of fourier series also
+ to converge to the actual function whereas only the first 25 frequencies
+ were used to estimate using least square estimation and hence significant
+ deviation is there.
+ In the case of 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+cos(
+\backslash
+cos(x))$
+\end_layout
+
+\end_inset
+
+ though, as it is periodic and higher frequency coefficients were very low,
+ with the first 25 frequencies itself the series converges to a very close
+ estimate of the actual function.
+ Also, the sudden changes at the end of Figure 1 is due to Gibb's phenomenon
+ in which sudden discontinuities in graph cannot be modeled by sine or cosine
+ functions which are continuous in nature.
+\end_layout
+
+\end_body
+\end_document

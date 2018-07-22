@@ -1,0 +1,2433 @@
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 7page%
+\topmargin 5pheight%
+\rightmargin 7page%
+\bottommargin 5pheight%
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\listings_params "language=Python,basicstyle={\ttfamily},keywordstyle={\color{blue}},commentstyle={\color{magenta}\itshape},breaklines=true,stringstyle={\color{green}}"
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Report - Assignment 10
+\end_layout
+
+\begin_layout Author
+Akshay Anand (EE16B046)
+\end_layout
+
+\begin_layout Abstract
+In this assignment, the fourier transform of some functions, with and without
+ a windowing function is found out and their graphs plotted.
+ Without windowing, for some functions, whose peak is not at any point in
+ the discrete time interval taken, the peak appears flat, and not entirely
+ accurate, whereas with windowing, for those function, the peaks become
+ visible, though they appear broad as a multiplication in time domain, done
+ by the Windowing function, results in a convolution in the frequency domain,
+ which results in broader peaks.
+ The Windowing function used is a Hamming window, given by the equation:
+\end_layout
+
+\begin_layout Abstract
+\begin_inset Formula 
+\[
+w\left[n\right]=\begin{cases}
+0.54+0.46\cos\left(\frac{2\pi n}{N-1}\right) & \mid n\mid\leq\frac{N-1}{2}\\
+0 & else
+\end{cases}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+Libraries Used
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+import numpy as np
+\end_layout
+
+\begin_layout Plain Layout
+
+import numpy.fft as f
+\end_layout
+
+\begin_layout Plain Layout
+
+import matplotlib.pyplot as plt
+\end_layout
+
+\begin_layout Plain Layout
+
+import math
+\end_layout
+
+\begin_layout Plain Layout
+
+import mpl_toolkits.mplot3d.axes3d as p3
+\end_layout
+
+\begin_layout Plain Layout
+
+pi = math.pi
+\end_layout
+
+\begin_layout Plain Layout
+
+np.random.seed(5)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+Plotting Function Defined
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+def plot_function(w,Y,x_lim, function):
+\end_layout
+
+\begin_layout Plain Layout
+
+    fig, axes = plt.subplots(2, 1, figsize=(15, 7), sharex = True)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+    plt.suptitle("The DFT plots for " + function, fontsize=18)
+\end_layout
+
+\begin_layout Plain Layout
+
+    # The magnitude plot is plotted
+\end_layout
+
+\begin_layout Plain Layout
+
+    axes[0].plot(w,abs(Y),'b',w,abs(Y),'bo',lw=2)
+\end_layout
+
+\begin_layout Plain Layout
+
+    axes[0].set_xlim([-x_lim,x_lim])
+\end_layout
+
+\begin_layout Plain Layout
+
+    axes[0].set_ylabel(r"$|Y|$",size=16)
+\end_layout
+
+\begin_layout Plain Layout
+
+    axes[0].set_title("Spectrum of " + function, fontsize=14)
+\end_layout
+
+\begin_layout Plain Layout
+
+    axes[0].grid(True)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+    # The Phase plot is plotted
+\end_layout
+
+\begin_layout Plain Layout
+
+    ii=np.where(abs(Y)>1e-3)
+\end_layout
+
+\begin_layout Plain Layout
+
+    axes[1].plot(w[ii],np.angle(Y[ii]),'ro',lw=2)
+\end_layout
+
+\begin_layout Plain Layout
+
+    axes[1].set_xlim([-x_lim,x_lim])
+\end_layout
+
+\begin_layout Plain Layout
+
+    axes[1].set_ylim([-4,4])
+\end_layout
+
+\begin_layout Plain Layout
+
+    axes[1].set_ylabel(r"Phase of $Y$",size=16)
+\end_layout
+
+\begin_layout Plain Layout
+
+    axes[1].set_title("Phase Plot of " + function, fontsize=14)
+\end_layout
+
+\begin_layout Plain Layout
+
+    axes[1].set_xlabel(r"$
+\backslash
+omega$",size=16)
+\end_layout
+
+\begin_layout Plain Layout
+
+    axes[1].grid(True)
+\end_layout
+
+\begin_layout Plain Layout
+
+    plt.show()
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Example plots are plotted
+\end_layout
+
+\begin_layout Standard
+The example plots given in the question (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+sin(
+\backslash
+sqrt{2}x)$
+\end_layout
+
+\end_inset
+
+) is plotted with Hamming window and without Hamming window to know the
+ difference.
+ First of all, a Hamming window is required for this particular function
+ because, even though it is periodic, its 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+omega$
+\end_layout
+
+\end_inset
+
+ is 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+sqrt{2}$
+\end_layout
+
+\end_inset
+
+, and hence if we plot the points that are sampled by the program, repeated
+ periodically (whose fourier transform is actually found) the function is
+ not the same as the continuous time 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+sin(
+\backslash
+sqrt{2}x)$
+\end_layout
+
+\end_inset
+
+, as shown below.
+\end_layout
+
+\begin_layout Standard
+Actual 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+sin(
+\backslash
+sqrt{2}x)$
+\end_layout
+
+\end_inset
+
+ plot is as follows:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+t1=np.linspace(-pi,pi,65);t1=t1[:-1]   # The interval used to find the DFT.
+\end_layout
+
+\begin_layout Plain Layout
+
+t2=np.linspace(-3*pi,-pi,65);t2=t2[:-1]
+\end_layout
+
+\begin_layout Plain Layout
+
+t3=np.linspace(pi,3*pi,65);t3=t3[:-1]
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.plot(t2,np.sin(np.sqrt(2)*t2),'r',lw=2)
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.plot(t1,np.sin(np.sqrt(2)*t1),'b',lw=2)   # The interval t1 is plotted
+ in a different colour.
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.plot(t3,np.sin(np.sqrt(2)*t3),'r',lw=2)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.legend(('The actual wave','Part of the wave that is taken for finding
+ DFT'),bbox_to_anchor=(1, 1))
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.ylabel(r"$y$",size=16)
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.xlabel(r"$t$",size=16)
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.title(r"$
+\backslash
+sin
+\backslash
+left(
+\backslash
+sqrt{2}t
+\backslash
+right)$")
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.grid(True)
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.show()
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Plot obtained:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename actual_plot.png
+	scale 60
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+From the above plot, only the blue part is taken for DFT, and therefore,
+ if we repeat just that part to form a periodic function, the plot obtained
+ is:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+t1=np.linspace(-pi,pi,65);t1=t1[:-1]    # The interval used to find the DFT.
+\end_layout
+
+\begin_layout Plain Layout
+
+t2=np.linspace(-3*pi,-pi,65);t2=t2[:-1]
+\end_layout
+
+\begin_layout Plain Layout
+
+t3=np.linspace(pi,3*pi,65);t3=t3[:-1]
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+y = np.sin(np.sqrt(2)*t1)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+# The function on interval t1 is repeated periodically.
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.plot(t2,y,'ro',lw=2)
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.plot(t1,y,'bo',lw=2)
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.plot(t3,y,'ro',lw=2)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.legend(('Repeated wave','Part of the wave that is taken for finding DFT'),bbo
+x_to_anchor=(1, 1))
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.ylabel(r"$y$",size=16)
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.xlabel(r"$t$",size=16)
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.title(r"$
+\backslash
+sin
+\backslash
+left(
+\backslash
+sqrt{2}t
+\backslash
+right)$ sampled and repeated")
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.grid(True)
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.show()
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename calc_plot.png
+	scale 60
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Thus, it can be seen that, in the actual plot that is used to find DFT,
+ there is a huge discontinuity between successive periods, which is mainly
+ due to the fact that 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+sqrt{2}$
+\end_layout
+
+\end_inset
+
+ is an irrational number and therefore can't be plotted correctly in a discrete
+ time waveform.
+ It is this discontinuity that poses problems when calculating DFT, as Gibb's
+ phenomenon occurs here.
+ The main aim of windowing is to reduce this discontinuity without affecting
+ the rest of the graphs very much, and as seen from the DFT plots below,
+ it does work to a large extent.
+ Before that, just to show, the same graph above, after windowing, the plot
+ in time domain is as follows:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+t1=np.linspace(-pi,pi,65);t1=t1[:-1]   # The interval used to find the DFT.
+\end_layout
+
+\begin_layout Plain Layout
+
+t2=np.linspace(-3*pi,-pi,65);t2=t2[:-1]
+\end_layout
+
+\begin_layout Plain Layout
+
+t3=np.linspace(pi,3*pi,65);t3=t3[:-1]
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+n=np.arange(64)
+\end_layout
+
+\begin_layout Plain Layout
+
+wnd=f.fftshift(0.54+0.46*np.cos(2*pi*n/63))
+\end_layout
+
+\begin_layout Plain Layout
+
+y=np.sin(np.sqrt(2)*t1)*wnd
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+# The function on interval t1 is windowed and repeated periodically.
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.plot(t2,y,'ro',lw=2)
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.plot(t1,y,'bo',lw=2)
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.plot(t3,y,'ro',lw=2)
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.legend(('Repeated wave','Part of the windowed wave that is taken for
+ finding DFT'),bbox_to_anchor=(1, 1))
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.ylabel(r"$y$",size=16)
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.xlabel(r"$t$",size=16)
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.title(r"$
+\backslash
+sin
+\backslash
+left(
+\backslash
+sqrt{2}t
+\backslash
+right)$ windowed, sampled and repeated")
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.grid(True)
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.show()
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename calc_plot_with_window.png
+	scale 60
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Thus, it is seen that, after windowing, the overall shape of the graph is
+ preserved with a much reduced discontinuity.
+ Now, the DFT of the function is calculated with and without windowing and
+ observations are noted.
+\end_layout
+
+\begin_layout Subsection
+Plot without Hamming window
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+t = np.linspace(-4*pi,4*pi,257)   # Time interval declared
+\end_layout
+
+\begin_layout Plain Layout
+
+t = t[:-1]
+\end_layout
+
+\begin_layout Plain Layout
+
+dt = t[1]-t[0]
+\end_layout
+
+\begin_layout Plain Layout
+
+fmax = 1/dt
+\end_layout
+
+\begin_layout Plain Layout
+
+y = np.sin(np.sqrt(2)*t)          # Function defined
+\end_layout
+
+\begin_layout Plain Layout
+
+y[0]=0
+\end_layout
+
+\begin_layout Plain Layout
+
+y=f.fftshift(y)
+\end_layout
+
+\begin_layout Plain Layout
+
+Y=f.fftshift(f.fft(y))/256.0
+\end_layout
+
+\begin_layout Plain Layout
+
+w=np.linspace(-pi*fmax,pi*fmax,257);w=w[:-1]
+\end_layout
+
+\begin_layout Plain Layout
+
+plot_function(w,Y,4,'$
+\backslash
+sin(
+\backslash
+sqrt{2}x)$ without windowing.')
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The graph obtained is:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+vspace{5pt}$
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename plot_1_without_window.png
+	scale 55
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Plot with Hamming window
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+t = np.linspace(-4*pi,4*pi,257)
+\end_layout
+
+\begin_layout Plain Layout
+
+t = t[:-1]
+\end_layout
+
+\begin_layout Plain Layout
+
+dt = t[1]-t[0]
+\end_layout
+
+\begin_layout Plain Layout
+
+fmax = 1/dt
+\end_layout
+
+\begin_layout Plain Layout
+
+n = np.arange(256)
+\end_layout
+
+\begin_layout Plain Layout
+
+wnd=f.fftshift(0.54+0.46*np.cos(2*pi*n/255))    # Hamming window declared.
+   
+\end_layout
+
+\begin_layout Plain Layout
+
+y = np.sin(np.sqrt(2)*t)
+\end_layout
+
+\begin_layout Plain Layout
+
+y = y * wnd              # Hamming window multipled in the time domain
+\end_layout
+
+\begin_layout Plain Layout
+
+y[0]=0
+\end_layout
+
+\begin_layout Plain Layout
+
+y=f.fftshift(y)
+\end_layout
+
+\begin_layout Plain Layout
+
+Y=f.fftshift(f.fft(y))/256.0
+\end_layout
+
+\begin_layout Plain Layout
+
+w=np.linspace(-pi*fmax,pi*fmax,257);w=w[:-1]
+\end_layout
+
+\begin_layout Plain Layout
+
+plot_function(w,Y,4,'$
+\backslash
+sin(
+\backslash
+sqrt{2}x)$ with windowing')
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Graph obtained is:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+vspace{5pt}$
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename plot_1_with_window.png
+	scale 55
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+vspace{5pt}$
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Thus, from the plots above, it can be seen that, without windowing, due
+ to the high discontinuity, though the peaks exist, it doesn't reduce to
+ 0 fast, and a phase exist for the wave even in between the peaks where
+ its supposed to be 0.
+ From the latter plot, with windowing, it is observed that, although the
+ peak is broader (which is expected as multiplication in time domain by
+ the windowing function is equivalent to convolution in frequency domain,
+ which results in a broader peak), the magnitude does go to 0 fast, and
+ there is no phase in between the peaks.
+ Also, the obtained peak is in between 1 and 2, which is expected as ideally
+ the peak is at 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+sqrt{2} 
+\backslash
+approx 1.414$
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+vspace{5pt}$
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+DFT of 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+cos^3(0.86t)$
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Just like the previous example, 0.86 is also not in the sampled points and
+ hence, it will also have a discontinuity, when the interval for which DFT
+ is taken is repeated periodically, which is seen in its DFT as a wide peak,
+ which doesn't go to 0 anywhere in between.
+ This is because of the Gibb's phenomenon at the discontinuity, because
+ of which, a lot of frequency components would be present in the DFT.
+ This is very much reduced when the function is windowed as seen below.
+\end_layout
+
+\begin_layout Subsection
+Without Windowing
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+t = np.linspace(-4*pi,4*pi,257)
+\end_layout
+
+\begin_layout Plain Layout
+
+t = t[:-1]
+\end_layout
+
+\begin_layout Plain Layout
+
+dt = t[1]-t[0]
+\end_layout
+
+\begin_layout Plain Layout
+
+fmax = 1/dt
+\end_layout
+
+\begin_layout Plain Layout
+
+y = np.cos(0.86*t) ** 3
+\end_layout
+
+\begin_layout Plain Layout
+
+y[0]=0
+\end_layout
+
+\begin_layout Plain Layout
+
+y=f.fftshift(y)
+\end_layout
+
+\begin_layout Plain Layout
+
+Y=f.fftshift(f.fft(y))/256.0
+\end_layout
+
+\begin_layout Plain Layout
+
+w=np.linspace(-pi*fmax,pi*fmax,257);w=w[:-1]
+\end_layout
+
+\begin_layout Plain Layout
+
+plot_function(w,Y,4,'$
+\backslash
+cos^3(0.86t)$ without windowing.')
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename plot_2_without_window.png
+	scale 55
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+With Windowing
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+t = np.linspace(-4*pi,4*pi,257)
+\end_layout
+
+\begin_layout Plain Layout
+
+t = t[:-1]
+\end_layout
+
+\begin_layout Plain Layout
+
+dt = t[1]-t[0]
+\end_layout
+
+\begin_layout Plain Layout
+
+fmax = 1/dt
+\end_layout
+
+\begin_layout Plain Layout
+
+n = np.arange(256)
+\end_layout
+
+\begin_layout Plain Layout
+
+wnd=f.fftshift(0.54+0.46*np.cos(2*pi*n/255))
+\end_layout
+
+\begin_layout Plain Layout
+
+y = np.cos(0.86*t) ** 3
+\end_layout
+
+\begin_layout Plain Layout
+
+y = y * wnd
+\end_layout
+
+\begin_layout Plain Layout
+
+y[0]=0 
+\end_layout
+
+\begin_layout Plain Layout
+
+y=f.fftshift(y)
+\end_layout
+
+\begin_layout Plain Layout
+
+Y=f.fftshift(f.fft(y))/256.0
+\end_layout
+
+\begin_layout Plain Layout
+
+w=np.linspace(-pi*fmax,pi*fmax,257);w=w[:-1]
+\end_layout
+
+\begin_layout Plain Layout
+
+plot_function(w,Y,4,'$
+\backslash
+cos^3(0.86t)$ with windowing.')
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename plot_2_with_window.png
+	scale 55
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Thus, the observations stated above are verified.
+\end_layout
+
+\begin_layout Section
+Estimating 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+omega_0$
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+delta$
+\end_layout
+
+\end_inset
+
+ in 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+cos(
+\backslash
+omega_0 t + 
+\backslash
+delta)$
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+To do this, first the DFT of the function (modelled as a 128 element vector)
+ is plotted after windowing so as to get accurate peaks in the magnitude
+ plot.
+ Since, it is a 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+cos$
+\end_layout
+
+\end_inset
+
+ function, the phase would be 0 normally.
+ So 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+delta$
+\end_layout
+
+\end_inset
+
+ would be the phase of the spectrum at its peaks and 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+omega_0$
+\end_layout
+
+\end_inset
+
+ would be approximately equal to the average of elements near the peak,
+ as the peak is broadened due to windowing.
+ Some examples are considered below:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+# A random delta and omega declared to find error
+\end_layout
+
+\begin_layout Plain Layout
+
+delta = 1.9
+\end_layout
+
+\begin_layout Plain Layout
+
+omega = 1.2
+\end_layout
+
+\begin_layout Plain Layout
+
+t = np.linspace(-pi,pi,129)
+\end_layout
+
+\begin_layout Plain Layout
+
+t = t[:-1]
+\end_layout
+
+\begin_layout Plain Layout
+
+dt = t[1]-t[0]
+\end_layout
+
+\begin_layout Plain Layout
+
+fmax = 1/dt
+\end_layout
+
+\begin_layout Plain Layout
+
+n = np.arange(128)
+\end_layout
+
+\begin_layout Plain Layout
+
+wnd=f.fftshift(0.54+0.46*np.cos(2*pi*n/127))
+\end_layout
+
+\begin_layout Plain Layout
+
+y = np.cos(omega*t + delta)
+\end_layout
+
+\begin_layout Plain Layout
+
+y = y * wnd
+\end_layout
+
+\begin_layout Plain Layout
+
+y[0]=0 
+\end_layout
+
+\begin_layout Plain Layout
+
+y=f.fftshift(y)
+\end_layout
+
+\begin_layout Plain Layout
+
+Y=f.fftshift(f.fft(y))/128.0
+\end_layout
+
+\begin_layout Plain Layout
+
+w=np.linspace(-pi*fmax,pi*fmax,129);w=w[:-1]
+\end_layout
+
+\begin_layout Plain Layout
+
+plot_function(w,Y,4,'$
+\backslash
+cos(1.2t + 1.9)$ without noise.')
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The graph obtained is:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename estimate.png
+	scale 55
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Now, the values of 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+delta$
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+omega_0$
+\end_layout
+
+\end_inset
+
+ are estimated from the calculated DFT:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+ii = np.where(w>0)[0]    # All values of DFT above w=0 are taken (only one
+ half of plot)
+\end_layout
+
+\begin_layout Plain Layout
+
+ii = np.where((abs(Y) == max(abs(Y[ii]))))   # The maximum in this region
+ is taken as the peak.
+\end_layout
+
+\begin_layout Plain Layout
+
+est_delta = abs(np.angle(Y[ii])[0])   # The phase of the graph at the peak
+ is the delta.
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+ii = np.where((abs(Y) > 3.5e-2) & (w >= 0))[0]    # The points greater than
+ or equal to w=0 and with a significant magnitude are taken.
+\end_layout
+
+\begin_layout Plain Layout
+
+est_omega = abs(Y[ii]*w[ii])      
+\end_layout
+
+\begin_layout Plain Layout
+
+est_omega = sum(est_omega)/(sum(abs(Y[ii])))  # As peak is spread out, omega
+ is estimated as the weighted average (centre of mass) of the broad area
+ near the peak (on one half of the plot).
+\end_layout
+
+\begin_layout Plain Layout
+
+print ('Without noise, the calculated delta is %.6f and the error in the
+ calculated delta is %.6f' %(est_delta, abs(est_delta - delta)))
+\end_layout
+
+\begin_layout Plain Layout
+
+print ('Without noise, the Calculated omega is %.6f and the error in the
+ calculated omega is %.6f' %(est_omega, abs(est_omega - omega)))
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In this case, the output obtained was:
+\end_layout
+
+\begin_layout LyX-Code
+Without noise, the calculated delta is 1.890923 and the error in the calculated
+ delta is 0.009077
+\end_layout
+
+\begin_layout LyX-Code
+Without noise, the Calculated omega is 1.247086 and the error in the calculated
+ omega is 0.047086
+\end_layout
+
+\begin_layout Standard
+Thus, with windowing, we are able to estimate the original values to a reasonabl
+e level of accuracy.
+\end_layout
+
+\begin_layout Section
+Estimating of 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+omega_0$
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+delta$
+\end_layout
+
+\end_inset
+
+ with noise
+\end_layout
+
+\begin_layout Standard
+Now, some white gaussian noise in the form of 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$0.1randn(128)$
+\end_layout
+
+\end_inset
+
+ is added to the above function, and its 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+delta$
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+omega_0$
+\end_layout
+
+\end_inset
+
+ are estimated again.
+ The actual 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+delta$
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+omega$
+\end_layout
+
+\end_inset
+
+ taken are same as before (1.9 and 1.2 respectively).
+\end_layout
+
+\begin_layout Standard
+The only extra line, when compared to the previous code is:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+y = y + 0.1*np.random.randn(128)
+\end_layout
+
+\end_inset
+
+ which is written before the windowing function is multiplied.
+\end_layout
+
+\begin_layout Standard
+After which, the same code above is used to find and estimate the 2 parameters,
+ for which the output obtained is:
+\end_layout
+
+\begin_layout LyX-Code
+With noise, the calculated delta is 1.884112 and the error in the calculated
+ delta is 0.015888
+\end_layout
+
+\begin_layout LyX-Code
+With noise, the Calculated omega is 1.260343 and the error in the calculated
+ omega is 0.060343
+\end_layout
+
+\begin_layout Standard
+Thus, it can be seen that, when the noise was added, the error increased,
+ though not by a lot.
+\end_layout
+
+\begin_layout Section
+Chirped Signal
+\end_layout
+
+\begin_layout Standard
+In this section, the DFT plots of the chirped signal (defined below) is
+ plotted, both with and without windowing.
+ Though, windowing is not really required here, as the function would be
+ continuous even after sampling it, as the beginning and ending values of
+ the function in the interval 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$[-
+\backslash
+pi,
+\backslash
+pi]$
+\end_layout
+
+\end_inset
+
+ are the same.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+x\left(t\right)=\cos\left(16\left(1.5+\frac{t}{2\pi}\right)t\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+# Plotting the chirped signal without windowing.
+\end_layout
+
+\begin_layout Plain Layout
+
+t = np.linspace(-pi,pi,1025)
+\end_layout
+
+\begin_layout Plain Layout
+
+t = t[:-1]
+\end_layout
+
+\begin_layout Plain Layout
+
+dt = t[1]-t[0]
+\end_layout
+
+\begin_layout Plain Layout
+
+fmax = 1/dt
+\end_layout
+
+\begin_layout Plain Layout
+
+y = np.cos(16*t*(1.5 + (t/(2*pi))))
+\end_layout
+
+\begin_layout Plain Layout
+
+y[0]=0
+\end_layout
+
+\begin_layout Plain Layout
+
+y=f.fftshift(y)
+\end_layout
+
+\begin_layout Plain Layout
+
+Y=f.fftshift(f.fft(y))/1024.0
+\end_layout
+
+\begin_layout Plain Layout
+
+w=np.linspace(-pi*fmax,pi*fmax,1025)
+\end_layout
+
+\begin_layout Plain Layout
+
+w=w[:-1]
+\end_layout
+
+\begin_layout Plain Layout
+
+plot_function(w,Y,100,'The Chirped Signal (without windowing)')
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+# Plotting the chirped signal with windowing.
+\end_layout
+
+\begin_layout Plain Layout
+
+t = np.linspace(-pi,pi,1025)
+\end_layout
+
+\begin_layout Plain Layout
+
+t = t[:-1]
+\end_layout
+
+\begin_layout Plain Layout
+
+dt = t[1]-t[0]
+\end_layout
+
+\begin_layout Plain Layout
+
+fmax = 1/dt
+\end_layout
+
+\begin_layout Plain Layout
+
+n = np.arange(1024)
+\end_layout
+
+\begin_layout Plain Layout
+
+wnd=f.fftshift(0.54+0.46*np.cos(2*pi*n/1023))
+\end_layout
+
+\begin_layout Plain Layout
+
+y = np.cos(16*t*(1.5 + (t/(2*pi))))
+\end_layout
+
+\begin_layout Plain Layout
+
+y = y * wnd
+\end_layout
+
+\begin_layout Plain Layout
+
+y[0]=0
+\end_layout
+
+\begin_layout Plain Layout
+
+y=f.fftshift(y)
+\end_layout
+
+\begin_layout Plain Layout
+
+Y=f.fftshift(f.fft(y))/1024.0
+\end_layout
+
+\begin_layout Plain Layout
+
+w=np.linspace(-pi*fmax,pi*fmax,1025)
+\end_layout
+
+\begin_layout Plain Layout
+
+w=w[:-1]
+\end_layout
+
+\begin_layout Plain Layout
+
+plot_function(w,Y,100,'The Chirped Signal (with windowing)')
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename chirped_without_window.png
+	scale 55
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename chirped_with_window.png
+	scale 55
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Thus, again, it can be seen that when the signal is windowed the peaks are
+ more clearer (distinct), even though they are broader, whereas without
+ windowing the peaks are jagged and not clear at all.
+ Also, the magnitude also decreases at a much slower rate in the one without
+ windowing, as seen from the fact that a phase is present throughout, for
+ the case without windowing, whereas, for the one with, it decreases faster.
+\end_layout
+
+\begin_layout Section
+Frequency - Time plot for Chirped Signal
+\end_layout
+
+\begin_layout Standard
+In this, the 1024 vector created earlier is divided into segments of 64
+ samples each.
+ Then, the DFT of each sample is taken, and this is plotted in a surface
+ plot with respect to time.
+\end_layout
+
+\begin_layout Subsection
+Disjoint samples taken
+\end_layout
+
+\begin_layout Standard
+In this case, the 64 sample wide section taken is disjoint, and therefore
+ a rough graph would be obtained, but this will be faster to plot, as number
+ of elements in graph would be lesser.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+t = np.linspace(-pi,pi,1025)
+\end_layout
+
+\begin_layout Plain Layout
+
+t = t[:-1]
+\end_layout
+
+\begin_layout Plain Layout
+
+dt = t[1]-t[0]
+\end_layout
+
+\begin_layout Plain Layout
+
+fmax = 1/dt
+\end_layout
+
+\begin_layout Plain Layout
+
+t = np.array(np.split(t, 16))    # The entire 1024 elements are split into
+ 16 disjoint sets of 64 elements each.
+\end_layout
+
+\begin_layout Plain Layout
+
+n = np.arange(64)
+\end_layout
+
+\begin_layout Plain Layout
+
+wnd=f.fftshift(0.54+0.46*np.cos(2*pi*n/63))
+\end_layout
+
+\begin_layout Plain Layout
+
+y = np.cos(16*t*(1.5 + (t/(2*pi))))
+\end_layout
+
+\begin_layout Plain Layout
+
+y = y * wnd
+\end_layout
+
+\begin_layout Plain Layout
+
+y[0]=0
+\end_layout
+
+\begin_layout Plain Layout
+
+y=f.fftshift(y)
+\end_layout
+
+\begin_layout Plain Layout
+
+Y=f.fftshift(f.fft(y))/64.0
+\end_layout
+
+\begin_layout Plain Layout
+
+w=np.linspace(-pi*fmax,pi*fmax,65)
+\end_layout
+
+\begin_layout Plain Layout
+
+w=w[:-1]
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+n = np.arange(0,1024,64)
+\end_layout
+
+\begin_layout Plain Layout
+
+fig1 = plt.figure(4)
+\end_layout
+
+\begin_layout Plain Layout
+
+ax = p3.Axes3D(fig1)
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.title('Frequency vs Time surface plot')
+\end_layout
+
+\begin_layout Plain Layout
+
+ax.set_xlabel('Frequency ($
+\backslash
+omega$)')
+\end_layout
+
+\begin_layout Plain Layout
+
+ax.set_ylabel('Time Block')
+\end_layout
+
+\begin_layout Plain Layout
+
+ax.set_xlim([-100,100])
+\end_layout
+
+\begin_layout Plain Layout
+
+ax.set_zlabel('DFT of signal')
+\end_layout
+
+\begin_layout Plain Layout
+
+x,y = np.meshgrid(w,n)
+\end_layout
+
+\begin_layout Plain Layout
+
+x[x>100]= np.nan      # Without this and the next line, the surface plot
+ overflows due to the setting of xlim.
+\end_layout
+
+\begin_layout Plain Layout
+
+x[x<-100]= np.nan
+\end_layout
+
+\begin_layout Plain Layout
+
+surf = ax.plot_surface(x, y, abs(Y), rstride=1, cstride=1,cmap=plt.cm.jet,linewidth
+=0, antialiased=False)
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.show()
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The graph obtained is:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename surface_plot.png
+	scale 60
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Thus, it is seen that at lesser time instants, the peaks of the DFT are
+ closer to each other, while as the time instant (from which the 64 time
+ points are taken) increases, the peaks become more wide apart.
+ Because the graph was plotted with sets that are disjoint, this variation
+ is not that clearly seen in the surface plot.
+ It is more clearly seen in the one below.
+\end_layout
+
+\begin_layout Standard
+The contour plot of the above surface plot is:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+plt.contourf(n,w,abs(Y).transpose())
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.ylabel('Frequency ($
+\backslash
+omega$)')
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.xlabel('Initial time of block')
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.title('Frequency vs Time plot')
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.ylim(-300,300)
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.show()
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename contour_plot_2.png
+	scale 60
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Continuous samples taken
+\end_layout
+
+\begin_layout Standard
+In this case, continous samples of 64 element wide sets are taken, i.e unlike
+ the previous case where the sets were non-overlapping, in this case, the
+ sets are overlapping, so as to provide a more clearer graph.
+ Though the disadvantage of this method is that, plotting a 3D surface plot
+ with these many elements will make the rendering of the graph very slow,
+ and very difficult to interact with, hence a filled contour plot is plotted
+ from which the same information can be extracted.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+t = np.linspace(-pi,pi,1025)
+\end_layout
+
+\begin_layout Plain Layout
+
+t = t[:-1]
+\end_layout
+
+\begin_layout Plain Layout
+
+dt = t[1]-t[0]
+\end_layout
+
+\begin_layout Plain Layout
+
+fmax = 1/dt
+\end_layout
+
+\begin_layout Plain Layout
+
+Y = []
+\end_layout
+
+\begin_layout Plain Layout
+
+for i in range(0,960):           # A loop is run to take sample at each
+ instant.
+\end_layout
+
+\begin_layout Plain Layout
+
+    x = np.array(t[i:i+64])      # 64 elements are taken starting at each
+ time.
+\end_layout
+
+\begin_layout Plain Layout
+
+    y = np.cos(16*x*(1.5 + (x/(2*pi))))
+\end_layout
+
+\begin_layout Plain Layout
+
+    n = np.arange(64)
+\end_layout
+
+\begin_layout Plain Layout
+
+    wnd=f.fftshift(0.54+0.46*np.cos(2*pi*n/63))
+\end_layout
+
+\begin_layout Plain Layout
+
+    y = y * wnd
+\end_layout
+
+\begin_layout Plain Layout
+
+    y[0]=0
+\end_layout
+
+\begin_layout Plain Layout
+
+    y=f.fftshift(y)
+\end_layout
+
+\begin_layout Plain Layout
+
+    Y.append(f.fftshift(f.fft(y))/64.0)   # FFT taken for each 64 element set.
+\end_layout
+
+\begin_layout Plain Layout
+
+n = np.arange(960)
+\end_layout
+
+\begin_layout Plain Layout
+
+w=np.linspace(-pi*fmax,pi*fmax,65)
+\end_layout
+
+\begin_layout Plain Layout
+
+w=w[:-1]
+\end_layout
+
+\begin_layout Plain Layout
+
+Y = np.array(Y)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.contourf(n,w,abs(Y).transpose())
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.ylabel('Frequency ($
+\backslash
+omega$)')
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.xlabel('Initial time of block')
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.title('Frequency vs Time plot')
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.ylim(-300,300)
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.show()
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+fig1 = plt.figure(4)
+\end_layout
+
+\begin_layout Plain Layout
+
+ax = p3.Axes3D(fig1)
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.title('Frequency vs Time surface plot.')
+\end_layout
+
+\begin_layout Plain Layout
+
+ax.set_xlabel('Frequency ($
+\backslash
+omega$)')
+\end_layout
+
+\begin_layout Plain Layout
+
+ax.set_ylabel('Time Block')
+\end_layout
+
+\begin_layout Plain Layout
+
+ax.set_xlim([-100,100])
+\end_layout
+
+\begin_layout Plain Layout
+
+ax.set_zlabel('DFT of signal')
+\end_layout
+
+\begin_layout Plain Layout
+
+x,y = np.meshgrid(w,n)
+\end_layout
+
+\begin_layout Plain Layout
+
+x[x>100]= np.nan
+\end_layout
+
+\begin_layout Plain Layout
+
+x[x<-100]= np.nan
+\end_layout
+
+\begin_layout Plain Layout
+
+surf = ax.plot_surface(x, y, abs(Y), rstride=1, cstride=1,cmap=plt.cm.jet,linewidth
+=0, antialiased=False)
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.show()
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename contour_plot.png
+	scale 70
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Thus, it can be seen that the two peaks do become more and more separate
+ as time increases, which was observed before also, but this time, as continuous
+ sets were taken, this transition is clearer.
+ Just for reference, the surface plot obtained is shown below (although
+ interacting with the graph when running the python file is very slow due
+ to the large number of points that constitute the plot):
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename surface_plot_2.png
+	scale 50
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Thus, it is seen that, at lesser time instants, there is just a single peak
+ in the middle which eventually splits into 2 peaks as tie increases, which
+ was seen in simpler way in the contour plot plotted above.
+ Also, compared to the disjoint samples, both the contour plot and the surface
+ plot vary much more smoothly, which is expected, as continuous samples
+ were taken.
+\end_layout
+
+\begin_layout Standard
+It can also be seen that, initially there was just a single peak at a very
+ high magnitude, which reduced and split into 2 peaks with reduced magnitudes,
+ thus qualitatively, we can say that the energy of the DFT remains constant
+ as time increases, which is expected as energy can't be created or destroyed.
+\end_layout
+
+\begin_layout Section
+Conclusion
+\end_layout
+
+\begin_layout Standard
+The observations and conclusions for each section is written in the respective
+ sections.
+ Some general conclusions are explained below.
+\end_layout
+
+\begin_layout Standard
+The normal DFT need not provide accurate peaks of the function, because
+ of the fact that, it depends on the rate at which sampling is done on the
+ continous time signal.
+ If the rate of sampling is not a multiple of the signal frequency, a mismatch
+ between signals occur after sampling.
+ Because of this mismatch, periodic continuous time signals become discontinuous
+ periodic signals after sampling, and this discontinuity is the one that
+ causes the ambiguity in the fourier transform in the form of Gibb's Phenomenon.
+ 
+\end_layout
+
+\begin_layout Standard
+One way to reduce this ambiguity is to reduce the discontinuity in the initial
+ function, which is done by mulitplying the function with a windowing function,
+ which, as seen above, reduces the discontinuity, and makes the peaks more
+ visible in the DFT.
+ Though these peaks do become broader, because of the fact that, multiplication
+ in the time domain leads to convolution in the frequency domain, which
+ leads to broadening of the peaks.
+ 
+\end_layout
+
+\begin_layout Standard
+Thus, in general windowing helps in better distinguishing the function which
+ becomes discontinuous after sampling.
+\end_layout
+
+\end_body
+\end_document

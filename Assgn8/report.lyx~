@@ -1,0 +1,2589 @@
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 7page%
+\topmargin 5pheight%
+\rightmargin 7page%
+\bottommargin 5pheight%
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\listings_params "language=Python,basicstyle={\ttfamily},keywordstyle={\color{blue}},commentstyle={\color{magenta}\itshape},breaklines=true,stringstyle={\color{green}}"
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Report - Assignment 8
+\end_layout
+
+\begin_layout Author
+Akshay Anand (EE16B046)
+\end_layout
+
+\begin_layout Abstract
+In this week's assignment, the functions in sympy were used to solve the
+ equations for a low-pass and a high-pass filter, employed using opamps,
+ and as such get the transfer function of the system.
+ Then, this transfer function was used to find the output waveform when
+ an input with different frequency components were given, like
+\begin_inset Formula $\left(\sin\left(2000\pi t\right)+\cos\left(2\times10^{6}\pi t\right)\right)u_{0}\left(t\right)$
+\end_inset
+
+ using the functions that were used in last week's assignment, particularly
+ 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$scipy.signal.lsim$
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$scipy.signal.impulse$
+\end_layout
+
+\end_inset
+
+.
+ The latter was used to find the waveform when the laplace transform of
+ the output was known and the former was used to find the output when the
+ input signal in the time domain is known, as well as the transfer function
+ (in the frequency domain).
+ Then, the input to the system was varied from a step function, to an exponentia
+lly decaying sinusooid and the various outputs that were obtained were noted.
+\end_layout
+
+\begin_layout Section*
+Libraries and Global Variables Used
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+from sympy import *      
+\end_layout
+
+\begin_layout Plain Layout
+
+import matplotlib.pyplot as plt
+\end_layout
+
+\begin_layout Plain Layout
+
+import numpy as np
+\end_layout
+
+\begin_layout Plain Layout
+
+import math
+\end_layout
+
+\begin_layout Plain Layout
+
+import scipy.signal as sp
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+init_session       # Denotes that, an interactive sympy session has begun
+\end_layout
+
+\begin_layout Plain Layout
+
+s = symbols('s')   # The symbol for denoting the 's' parameter in Laplace
+ transforms
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Low-Pass Filter
+\end_layout
+
+\begin_layout Standard
+In this, a low-pass filter circuit was realised using capacitors, resistors,
+ and an opamp in negative feedback.
+ The various KCL equations at the different nodes, that were used for solving
+ the circuit are:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+V_{m}=\frac{V_{o}}{G}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+V_{p}=V_{1}\frac{1}{1+j\omega R_{2}C_{2}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+V_{o}=G\left(V_{p}-V_{m}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\frac{V_{i}-V_{1}}{R_{1}}+\frac{V_{p}-V_{1}}{R_{2}}+j\omega C_{1}\left(V_{o}-V_{1}\right)=0
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In the above equations, 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$G$
+\end_layout
+
+\end_inset
+
+ is the ratio in which the output voltage is divided in the resistive feedback
+ path of the opamp, as well as numerically equal to the gain of the opamp.
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$V_p$
+\end_layout
+
+\end_inset
+
+ is the voltage at the positive terminal of the opamp, while 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$V_m$
+\end_layout
+
+\end_inset
+
+ is that in the negative terminal.
+ 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$V_i$
+\end_layout
+
+\end_inset
+
+ is the input node of the system, and the resistor 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$R_1$
+\end_layout
+
+\end_inset
+
+ is connected between this and node 1 (corresponding to 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$V_1$
+\end_layout
+
+\end_inset
+
+).
+ 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$R_2$
+\end_layout
+
+\end_inset
+
+ is connected between 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$V_1$
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$V_p$
+\end_layout
+
+\end_inset
+
+, while 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$C_2$
+\end_layout
+
+\end_inset
+
+ is connected between 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$V_p$
+\end_layout
+
+\end_inset
+
+ and ground.
+ Finally, the capacitor 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$C_1$
+\end_layout
+
+\end_inset
+
+ is connected between 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$V_1$
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$V_o$
+\end_layout
+
+\end_inset
+
+, in another feedback path that would be blocked for DC signals.
+\end_layout
+
+\begin_layout Standard
+These above equations were solved using matrices in sympy using the following
+ code:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+vspace{5pt}$
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+def lowpass(R1,R2,C1,C2,G,Vi):
+\end_layout
+
+\begin_layout Plain Layout
+
+    s=symbols('s')
+\end_layout
+
+\begin_layout Plain Layout
+
+    A=Matrix([[0,0,1,-1/G],[-1/(1+s*R2*C2),1,0,0], [0,-G,G,1],[-(1/R1)-(1/R2)-(s
+*C1),1/R2,0,s*C1]])
+\end_layout
+
+\begin_layout Plain Layout
+
+    b=Matrix([0,0,0,-Vi/R1])
+\end_layout
+
+\begin_layout Plain Layout
+
+    V=A.inv()*b
+\end_layout
+
+\begin_layout Plain Layout
+
+    return (A,b,V)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+vspace{5pt}$
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In this, matrix A is the coefficient matrix and B is the matrix having the
+ independent sources.
+\end_layout
+
+\begin_layout Standard
+The various functions related to calculating the time domain output are
+ declared below.
+ First, is the one that returns the frequency domain output of the system
+ for a particular input.
+ It takes 2 parameters: the laplace transform of the input and filterType,
+ which is whether to use highpass or lowpass filter.
+ High pass filter will be implemented in the next section.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+vspace{5pt}$
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+def get_response_freq_domain(h,filterType):
+\end_layout
+
+\begin_layout Plain Layout
+
+    if (filterType == 'l'):              # Low pass filter condition
+\end_layout
+
+\begin_layout Plain Layout
+
+        A,b,V = lowpass(10000,10000,1e-9,1e-9,1.586,h)
+\end_layout
+
+\begin_layout Plain Layout
+
+    elif (filterType == 'h'):            # High pass filter condition
+\end_layout
+
+\begin_layout Plain Layout
+
+        A,b,V = highpass(10000,10000,1e-9,1e-9,1.586,h)
+\end_layout
+
+\begin_layout Plain Layout
+
+    Vo=V[3]                              # The 4th element is Vo
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+    # The below lines convert the sympy expression to a numpy function and
+ get values for the resultant equation
+\end_layout
+
+\begin_layout Plain Layout
+
+    w=np.logspace(0,8,801)
+\end_layout
+
+\begin_layout Plain Layout
+
+    ss=1j*w
+\end_layout
+
+\begin_layout Plain Layout
+
+    hf=lambdify(s,Vo,'numpy')
+\end_layout
+
+\begin_layout Plain Layout
+
+    v=hf(ss)
+\end_layout
+
+\begin_layout Plain Layout
+
+    return Vo,w,abs(v),np.angle(v)       # Vo is returned so as to calculate
+ time domain output later
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+vspace{5pt}$
+\end_layout
+
+\end_inset
+
+Now, the time domain output has to be calculated from the frequency domain
+ sympy expression that is returned.
+ For that, the plot_output_time_domain() function is declared.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+vspace{5pt}$
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+def get_numpy_array_from_Poly(num,den):   # This is called only from the
+ function declared below
+\end_layout
+
+\begin_layout Plain Layout
+
+    isFloat = False
+\end_layout
+
+\begin_layout Plain Layout
+
+    try:
+\end_layout
+
+\begin_layout Plain Layout
+
+        num = Poly(num).all_coeffs()      # If the numerator is just a constant
+ value, this line will throw an error
+\end_layout
+
+\begin_layout Plain Layout
+
+    except GeneratorsNeeded:
+\end_layout
+
+\begin_layout Plain Layout
+
+        num = num                         # If an error is thrown above,
+ it means numerator is just a constant and hence, use as is
+\end_layout
+
+\begin_layout Plain Layout
+
+        isFloat = True
+\end_layout
+
+\begin_layout Plain Layout
+
+    den = Poly(den).all_coeffs()          # Get coefficients of denominator
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\end_layout
+
+\begin_layout Plain Layout
+
+    # The below steps are required as the coefficients obtained above are
+ not in a proper format to be used in numpy.poly1d(), so a numpy array is
+ generated from the above values, and then returned to the parent function.
+\end_layout
+
+\begin_layout Plain Layout
+
+    den2 = []
+\end_layout
+
+\begin_layout Plain Layout
+
+    num2 = []
+\end_layout
+
+\begin_layout Plain Layout
+
+    for i in den:
+\end_layout
+
+\begin_layout Plain Layout
+
+        den2.append(float(i))
+\end_layout
+
+\begin_layout Plain Layout
+
+    den2 = np.array(den2)
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\end_layout
+
+\begin_layout Plain Layout
+
+    if (isFloat):   # If numerator is a constant, no need to iterate through
+ it
+\end_layout
+
+\begin_layout Plain Layout
+
+        num2 = num
+\end_layout
+
+\begin_layout Plain Layout
+
+    else:
+\end_layout
+
+\begin_layout Plain Layout
+
+        for i in num:
+\end_layout
+
+\begin_layout Plain Layout
+
+            num2.append(float(i))
+\end_layout
+
+\begin_layout Plain Layout
+
+        num2 = np.array(num2)
+\end_layout
+
+\begin_layout Plain Layout
+
+    return num2,den2
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+def get_output_time_domain(Y,t,steps):
+\end_layout
+
+\begin_layout Plain Layout
+
+    simplY = simplify(Y)     # This gets the simplified expression of laplace
+ transform
+\end_layout
+
+\begin_layout Plain Layout
+
+    num = fraction(simplY)[0]   # Gets numerator of transform
+\end_layout
+
+\begin_layout Plain Layout
+
+    den = fraction(simplY)[1]   # Gets denominator of transform
+\end_layout
+
+\begin_layout Plain Layout
+
+    num2,den2 = get_numpy_array_from_Poly(num,den)  # This converts the
+ Poly() object obtained above to a numpy array
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\end_layout
+
+\begin_layout Plain Layout
+
+    # Calculate poly1d expressions for numerator and denominator
+\end_layout
+
+\begin_layout Plain Layout
+
+    num2 = np.poly1d(num2) 
+\end_layout
+
+\begin_layout Plain Layout
+
+    den2 = np.poly1d(den2)
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\end_layout
+
+\begin_layout Plain Layout
+
+    # Use scipy signal toolbox to get final output waveform
+\end_layout
+
+\begin_layout Plain Layout
+
+    Y = sp.lti(num2,den2)
+\end_layout
+
+\begin_layout Plain Layout
+
+    t = np.linspace(0.0,t,steps)
+\end_layout
+
+\begin_layout Plain Layout
+
+    t,y=sp.impulse(Y,None,t)
+\end_layout
+
+\begin_layout Plain Layout
+
+    return t,y
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+vspace{5pt}$
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The second function is called from the main program for calculating the
+ output, which in turn calls the first function to find and return the coefficie
+nts of the laplace transform of the output, so that 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$scipy.signal.impulse$
+\end_layout
+
+\end_inset
+
+ can calculate the output correctly.
+\end_layout
+
+\begin_layout Standard
+The above function can be used if the laplace tranform of the input is known.
+ If, only the time domain representation of the input is known, the following
+ function can be used to calculate the output usinf 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$scipy.signal.lsim$
+\end_layout
+
+\end_inset
+
+ instead of 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$scipy.signal.impulse$
+\end_layout
+
+\end_inset
+
+.
+ The function takes 3 parameters: The sympy expression of the transfer function,
+ time domain input wave as well as the time interval to calculate output.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+vspace{5pt}$
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+def get_output_with_lsim(H,x,t): 
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+    # The lines below are similar to that in get_output_time_domain() function
+\end_layout
+
+\begin_layout Plain Layout
+
+    simplH = simplify(H)
+\end_layout
+
+\begin_layout Plain Layout
+
+    num = fraction(simplH)[0]
+\end_layout
+
+\begin_layout Plain Layout
+
+    den = fraction(simplH)[1]
+\end_layout
+
+\begin_layout Plain Layout
+
+    num2,den2 = get_numpy_array_from_Poly(num,den)
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\end_layout
+
+\begin_layout Plain Layout
+
+    num2 = np.poly1d(num2)
+\end_layout
+
+\begin_layout Plain Layout
+
+    den2 = np.poly1d(den2)
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\end_layout
+
+\begin_layout Plain Layout
+
+    H = sp.lti(num2,den2)
+\end_layout
+
+\begin_layout Plain Layout
+
+    t,y,sec=sp.lsim(H,x,t)   # Here, lsim() is used to find output from time
+ domain input.
+\end_layout
+
+\begin_layout Plain Layout
+
+    return t,y
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Transfer function of system
+\end_layout
+
+\begin_layout Standard
+If, an input 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$V_i$
+\end_layout
+
+\end_inset
+
+ is given as an impulse (i.e laplace transform input is 1), then, the transfer
+ function of the above system can be known.
+ Thus, the transfer function, so calculated and plotted is:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+Vi = 1
+\end_layout
+
+\begin_layout Plain Layout
+
+H_l,w,v,ph = get_response_freq_domain(Vi,'l')
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+# The Bode plots of transfer function are plotted
+\end_layout
+
+\begin_layout Plain Layout
+
+fig, axes = plt.subplots(2, 1, figsize=(7, 8), sharex = True)
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.suptitle('Bode plots of low pass transfer function')
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[0].loglog(w,v,lw=2)
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[0].grid()
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[0].set_ylabel('Magnitude in log scale')
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[0].set_title('Magnitude Plot')
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].semilogx(w,ph,lw=2)
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].grid()
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].set_xlabel('Frequency in log scale')
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].set_ylabel('Phase in radians')
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].set_title('Phase Plot')
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.show()
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename low_pass_transfer.png
+	scale 70
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Thus, it is evident that, the system above acts as a low pass filter, as
+ it passes low frequencies with almost no attenuation, while highly attenuates
+ high frequency inputs.
+\end_layout
+
+\begin_layout Subsection
+Step Response
+\end_layout
+
+\begin_layout Standard
+The response of the low pass filter to a step input is calculated.
+ For this, the laplace transform of the step input (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+frac{1}{s}$
+\end_layout
+
+\end_inset
+
+) is used as input to the above functions and the step response in both
+ time and frequency domains are plotted.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+Vi = 1/s
+\end_layout
+
+\begin_layout Plain Layout
+
+Y,w,v = get_response_freq_domain(Vi,'l')
+\end_layout
+
+\begin_layout Plain Layout
+
+t,y = get_output_time_domain(Y,4e-3,10001)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+# The magnitude plot of the Laplace transform of the output is plotted
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.loglog(w,v,lw=2)
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.grid()
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.title('Step Response of the low pass filter')
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.xlabel('Frequency in log scale')
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.ylabel('Magnitude in log scale')
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.show()
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+# The time domain output is plotted 
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.plot(t,y)
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.grid()
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.title('Time domain output to step input')
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.xlabel('Time')
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.ylabel('y(t)')
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.ylim(-1,1)
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.show()
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+vspace{5pt}$
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The output plots obtained where
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename step_response_lowpass.png
+	scale 65
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename step_output_lowpass.png
+	scale 65
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Input as 
+\begin_inset Formula $\left(\sin\left(2000\pi t\right)+\cos\left(2\times10^{6}\pi t\right)\right)u_{0}\left(t\right)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+For this, the get_output_with_lsim() function is used, wherein we know the
+ time domain input, and the transfer function of the system (calculated
+ above as H).
+ Using these and 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$scipy.signal.lsim$
+\end_layout
+
+\end_inset
+
+, the output time domain wave is calculated.
+ In the below code segment, both the input and output waves are plotted
+ for comparison.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+t = np.linspace(0.0,4e-3,100001)     # Time for which output is to be calculated
+\end_layout
+
+\begin_layout Plain Layout
+
+x = np.sin(2000*math.pi*t) + np.cos(2*(10**6)*math.pi*t)   # Input wave is declared
+\end_layout
+
+\begin_layout Plain Layout
+
+t,y = get_output_with_lsim(H_l,x,t)   # The transfer function calculated
+ before is used here
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+fig, axes = plt.subplots(1, 2, figsize=(15, 7), sharey = True)
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[0].plot(t,y)
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[0].grid()
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[0].set_title('Output of lowpass filter to given input')
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[0].set_xlabel('Time')
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[0].set_ylabel('y(t)')
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].plot(t,x)
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].grid()
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].set_title('Input to lowpass filter')
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].set_xlabel('Time')
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].set_ylabel('y(t)')
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.show()
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+vspace{5pt}$
+\end_layout
+
+\end_inset
+
+ The graphs obtained are:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename output_lowpass.png
+	scale 55
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Thus, it is found that, although input had high frequency components, the
+ circuit filters all of this, and gives output as only the low frequency
+ component.
+\end_layout
+
+\begin_layout Section
+High-Pass Filter
+\end_layout
+
+\begin_layout Standard
+The only difference in this implementation is that the KCL equations used
+ for calculating 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$V_o$
+\end_layout
+
+\end_inset
+
+ would be different.
+ The KCL equations for a high pass filter using opamps, resistors and capacitors
+ are
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+V_{m}=\frac{V_{o}}{G}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+V_{p}=V_{1}\frac{j\omega R_{3}C_{2}}{1+j\omega R_{3}C_{2}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+V_{o}=G\left(V_{p}-V_{m}\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+j\omega C_{1}\left(V_{i}-V_{1}\right)+j\omega C_{2}\left(V_{p}-V_{1}\right)+\frac{V_{o}-V_{1}}{R_{1}}=0
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In the above equations, 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$G$
+\end_layout
+
+\end_inset
+
+ is the ratio in which the output voltage is divided in the resistive dividing
+ feedback path of the opamp, as well as numerically equal to the gain of
+ the opamp.
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$V_p$
+\end_layout
+
+\end_inset
+
+ is the voltage at the positive terminal of the opamp, while 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$V_m$
+\end_layout
+
+\end_inset
+
+ is that in the negative terminal.
+ 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$V_i$
+\end_layout
+
+\end_inset
+
+ is the input node of the system, and the capacitor 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$C_1$
+\end_layout
+
+\end_inset
+
+ is connected between this and node 1 (corresponding to 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$V_1$
+\end_layout
+
+\end_inset
+
+).
+ 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$C_2$
+\end_layout
+
+\end_inset
+
+ is connected between 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$V_1$
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$V_p$
+\end_layout
+
+\end_inset
+
+, while 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$R_3$
+\end_layout
+
+\end_inset
+
+ is connected between 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$V_p$
+\end_layout
+
+\end_inset
+
+ and ground.
+ Finally, the resistor 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$R_1$
+\end_layout
+
+\end_inset
+
+ is connected between 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$V_1$
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$V_o$
+\end_layout
+
+\end_inset
+
+, in another feedback path.
+\end_layout
+
+\begin_layout Standard
+A python function is declared that solves the above equations similar to
+ that done for lowpass filter.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+def highpass(R1,R2,C1,C2,G,Vi):
+\end_layout
+
+\begin_layout Plain Layout
+
+    s=symbols('s')
+\end_layout
+
+\begin_layout Plain Layout
+
+    A=Matrix([[0,0,1,-1/G],[-(s*R2*C2)/(1+s*R2*C2),1,0,0], [0,-G,G,1],[-(s*C1)-(
+s*C2)-(1/R1),s*C2,0,1/R1]])
+\end_layout
+
+\begin_layout Plain Layout
+
+    b=Matrix([0,0,0,-Vi*s*C1])
+\end_layout
+
+\begin_layout Plain Layout
+
+    V=A.inv()*b
+\end_layout
+
+\begin_layout Plain Layout
+
+    return (A,b,V)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+vspace{5pt}$
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+All the other functions that were declared to calculate and plot the output
+ transforms and signals can be used here also, as except the equations,
+ nothing else changes in the overall logic of the program.
+\end_layout
+
+\begin_layout Subsection
+Transfer function of the system
+\end_layout
+
+\begin_layout Standard
+Similar to before, if given an impulse as an input (with laplace transform
+ of 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$V_i$
+\end_layout
+
+\end_inset
+
+ as 1), we would get the transfer function.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+Vi = 1
+\end_layout
+
+\begin_layout Plain Layout
+
+H_h,w,v = get_response_freq_domain(Vi,'h')  # Here, 'h' is passed to the
+ function to use the high pass filter equations
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+# The transfer function is plotted
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.loglog(w,v,lw=2)
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.grid()
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.xlabel('Frequency in log scale')
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.ylabel('Magnitude in log scale')
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.title('Transfer function of the high pass filter')
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.show()
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Graph obtained is:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename high_pass_transfer.png
+	scale 70
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Thus, it is evident that, this system will highly attenuate low frequency
+ components of input and pass through high frequency components with minimal
+ attenuation.
+\end_layout
+
+\begin_layout Subsection
+Step response of the system
+\end_layout
+
+\begin_layout Standard
+In this, the input 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$V_i$
+\end_layout
+
+\end_inset
+
+ is given as 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+frac{1}{s}$
+\end_layout
+
+\end_inset
+
+, which is the step input and the output obtained is plotted.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+Vi = 1/s
+\end_layout
+
+\begin_layout Plain Layout
+
+Y,w,v = get_response_freq_domain(Vi,'h')
+\end_layout
+
+\begin_layout Plain Layout
+
+t,y = get_output_time_domain(Y,4e-3,10001)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+# The magnitude plot of the Laplace transform of the output is plotted
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.loglog(w,v,lw=2)
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.grid()
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.title('Step Response of the high pass filter') 
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.xlabel('Frequency in log scale')
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.ylabel('Magnitude in log scale')
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.show()
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+# The time domain output is plotted 
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.plot(t,y)
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.grid()
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.title('Time domain output to step input')
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.xlabel('Time')
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.ylabel('y(t)')
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.ylim(-1,1)
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.show()
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename step_response_highpass.png
+	scale 65
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename step_output_highpass.png
+	scale 65
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Input as 
+\begin_inset Formula $\left(\sin\left(2000\pi t\right)+\cos\left(2\times10^{6}\pi t\right)\right)u_{0}\left(t\right)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In this, the same input, which was given to the lowpass filter, is given
+ to the highpass filter.
+ In the lowpass filter case, it was seen that, only the low frequency component
+ was passed, so here the expected output is that only the high frequency
+ component should pass.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+t = np.linspace(0.0,4e-3,100001)     # Time for which output is to be calculated
+\end_layout
+
+\begin_layout Plain Layout
+
+x = np.sin(2000*math.pi*t) + np.cos(2*(10**6)*math.pi*t)   # Input wave is declared
+\end_layout
+
+\begin_layout Plain Layout
+
+t,y = get_output_with_lsim(H_h,x,t)   # The transfer function calculated
+ before is used here
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+fig, axes = plt.subplots(1, 2, figsize=(15, 7), sharey = True)
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[0].plot(t,y)
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[0].grid()
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[0].set_title('Output of highpass filter to given input')
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[0].set_xlabel('Time')
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[0].set_ylabel('y(t)')
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].plot(t,x)
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].grid()
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].set_title('Input to highpass filter')
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].set_xlabel('Time')
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].set_ylabel('y(t)')
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.show()
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Outputs obtained are:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename output_highpass.png
+	scale 55
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Thus, it is seen that, the output is indeed only the high frequency component
+ of the input.
+ Outputs with a shorter time range are plotted below, to actually see the
+ high frequency wave.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename output_highpass_2.png
+	scale 55
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The slow increase in the input is the beginning of the low frequency component
+ of the wave for the input, which is not seen in the output, as this component
+ is filtered off.
+\end_layout
+
+\begin_layout Subsection
+Exponentially decaying wave
+\end_layout
+
+\begin_layout Standard
+In this, 2 exponentially decaying waves are taken - with high frequency
+ (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$2
+\backslash
+times10^{6} Hz$
+\end_layout
+
+\end_inset
+
+) and low frequency (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$2000 Hz$
+\end_layout
+
+\end_inset
+
+) are taken, and the outputs obtained are compared.
+\end_layout
+
+\begin_layout Subsubsection
+Low Frequency decaying wave
+\end_layout
+
+\begin_layout Standard
+A decaying wave of frequency 2000 Hz, is given as input to the high pass
+ filter and output obtained is observed.
+ The input given is 
+\begin_inset Formula $\sin\left(2000\pi t\right)e^{-1000t}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+t = np.linspace(0.0,4e-3,100001)     # Time for which output is to be calculated
+\end_layout
+
+\begin_layout Plain Layout
+
+x = (np.sin(2000*math.pi*t))*np.exp((-10**3)*t)
+\end_layout
+
+\begin_layout Plain Layout
+
+t,y = get_output_with_lsim(H_h,x,t)   # The transfer function calculated
+ before is used here
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+fig, axes = plt.subplots(1, 2, figsize=(15, 7), sharey = True)
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[0].plot(t,y)
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[0].grid()
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[0].set_title('Output of highpass filter to given input')
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[0].set_xlabel('Time')
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[0].set_ylabel('y(t)')
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].plot(t,x)
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].grid()
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].set_title('Input to highpass filter')
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].set_xlabel('Time')
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].set_ylabel('y(t)')
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.show()
+\end_layout
+
+\end_inset
+
+The output obtained is:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename decaying_low_freq.png
+	scale 55
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+It is seen that, the output is almost 0.
+ This is because, as the system is a high pass filter, and the input has
+ low frequency, the output will have almost 0 amplitude as the low frequency
+ is highly attenuated.
+ Thus, when the magnitude is high initially, a small peak is observed, but
+ afterwards, the output is almost 0.
+\end_layout
+
+\begin_layout Subsubsection
+High Frequency decaying wave
+\end_layout
+
+\begin_layout Standard
+Here, a high frequency decaying wave is given as input and the output plot
+ obtained is observed.
+ The input given is 
+\begin_inset Formula $\sin\left(2\times10^{6}\pi t\right)e^{-10^{5}t}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+t = np.linspace(0.0,3e-5,100001)     # Time for which output is to be calculated
+\end_layout
+
+\begin_layout Plain Layout
+
+x = (np.sin(2*(10**6)*math.pi*t))*np.exp((-10**5)*t)
+\end_layout
+
+\begin_layout Plain Layout
+
+t,y = get_output_with_lsim(H_h,x,t)   # The transfer function calculated
+ before is used here
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+fig, axes = plt.subplots(1, 2, figsize=(15, 7), sharey = True)
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[0].plot(t,y)
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[0].grid()
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[0].set_title('Output of highpass filter to given input')
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[0].set_xlabel('Time')
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[0].set_ylabel('y(t)')
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].plot(t,x)
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].grid()
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].set_title('Input to highpass filter')
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].set_xlabel('Time')
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].set_ylabel('y(t)')
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.show()
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Here, the output obtained is:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename decaying_high_freq.png
+	scale 55
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Thus, compared to the last one, it is seen that, the amplitude is not nearly
+ as attenuated as before (only a small amount due to the fact that the transfer
+ function was not exactly 1 at high frequencies).
+ The only way in which the amplitude of output decreases is when the the
+ input amplitude also decreased.
+\end_layout
+
+\begin_layout Section
+Conclusion
+\end_layout
+
+\begin_layout Enumerate
+From the step-response, of the low pass filter, it is seen that, at steady
+ state, output is a constant value (at a very low attenuation).
+ This is because, low pass filter will pass DC signals , and at time 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$t$
+\end_layout
+
+\end_inset
+
+ > 0, step input is a DC input.
+ At 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$t$
+\end_layout
+
+\end_inset
+
+ = 0, though the rise is gradual, as the capacitors themselves take time
+ to charge, and once they have done, the output becomes DC.
+\end_layout
+
+\begin_layout Enumerate
+For the other signal input to the filter, it is seen that, the low pass
+ filter passes only the low frequency component and almost completely attenuates
+ the high frequency part, as expected.
+ Also, from the Bode magnitude plot of the transfer function of the low
+ pass filter, it is observed that for the low frequency component of the
+ input (1000 Hz), the system has a gain of almost 1, whereas for that of
+ the high frequency component (10
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$^6$
+\end_layout
+
+\end_inset
+
+ Hz, gain is almost 10
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$^{-2}$
+\end_layout
+
+\end_inset
+
+, and hence is not visible in the graph.
+\end_layout
+
+\begin_layout Enumerate
+From the step-response of the high pass filter, it is seen that at 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$t$
+\end_layout
+
+\end_inset
+
+ > 0, output is 0.
+ This is because, at these instants, input is a DC value and the high pass
+ filter will attenuate this, and thus output will be almost 0.
+ At 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$t$
+\end_layout
+
+\end_inset
+
+ = 0, though, there is a peak for the output.
+ This is because, at this point of discontinuity in the input, as seen from
+ the frequency domain, a lot of high frequency components would be there,
+ hence these would be passed, and so, an output is observed only at this
+ point.
+ These high frequency components are due to the discontinuity, which cannot
+ be replicated using the fourier transform as the fourier transform decomposes
+ the function into a bunch of continuous time sinusoids, hence, Gibb's phenomeno
+n occurs at the discontinuity, causing the initial peak in the step response.
+\end_layout
+
+\begin_layout Enumerate
+When a regular input with 2 frequency components is given, it is seen that
+ the system passes only the high frequency component (10
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$^6$
+\end_layout
+
+\end_inset
+
+ Hz), while blocking the low frequency component (1000 Hz).
+ This is because, from the transfer function, it is seen that, the frequency
+ 10
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$^6$
+\end_layout
+
+\end_inset
+
+ Hz has a gain of almost 1, while 1000 Hz has only a gain of 10
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$^{-4}$
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Enumerate
+For a low frequency decaying input, output is almost zero, as the low frequency
+ wave will be highly attenuated by the system, whereas for a high frequency
+ decaying input, the attenuation is minimal, as the system has a very low
+ attenuation for the high frequency signals.
+\end_layout
+
+\end_body
+\end_document

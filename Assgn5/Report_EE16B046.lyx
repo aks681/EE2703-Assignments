@@ -1,0 +1,1243 @@
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 5page%
+\topmargin 7pheight%
+\rightmargin 5page%
+\bottommargin 7pheight%
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Report - Assignment 5
+\end_layout
+
+\begin_layout Author
+- Akshay Anand (EE16B046)
+\end_layout
+
+\begin_layout Abstract
+In this week's assignment, different plots were drawn to show the potential
+ gradient and the current density variation across a 1cm by 1cm copper plate,
+ having a circular wire of radius 0.35cm soldered to the center of the plate.
+ The bottom side of the plate was grounded.
+ The formula used to find the potential inside the plate is 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+nabla^2
+\backslash
+phi = 0$
+\end_layout
+
+\end_inset
+
+ (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+phi$
+\end_layout
+
+\end_inset
+
+ is the potential), which is the Laplace equation for a uniform region with
+ no net charge accumulation inside the region.
+ The boundary conditions used were that 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+phi$
+\end_layout
+
+\end_inset
+
+ should not vary in the normal direction at the left, right and top boundaries
+ (i.e 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+frac{
+\backslash
+partial 
+\backslash
+phi}{
+\backslash
+partial n} = 0$
+\end_layout
+
+\end_inset
+
+) and 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+phi$
+\end_layout
+
+\end_inset
+
+ is 0 at the bottom boundary (as it is grounded).
+ This loop to find 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+phi$
+\end_layout
+
+\end_inset
+
+ was iterated 1500 times and error between the each iteration was calculated
+ and plotted in a semilog axis.
+ The best fit line for error was also calculated and plotted using least
+ squares approximation.
+ Then, the current density (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$J$
+\end_layout
+
+\end_inset
+
+) was found using the formula 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$j_x = -
+\backslash
+frac{
+\backslash
+partial 
+\backslash
+phi}{
+\backslash
+partial x}$
+\end_layout
+
+\end_inset
+
+ (and the corresponding one for 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$y$
+\end_layout
+
+\end_inset
+
+) and plotted with a quiver plot.
+ After this, the temperature variation due to this current density was also
+ found and plotted to know which area would be the hottest.
+\end_layout
+
+\begin_layout Section*
+Libraries Used
+\end_layout
+
+\begin_layout LyX-Code
+from pylab import *
+\end_layout
+
+\begin_layout LyX-Code
+import mpl_toolkits.mplot3d.axes3d as p3
+\end_layout
+
+\begin_layout Section*
+Parameters declared
+\end_layout
+
+\begin_layout LyX-Code
+Nx = 25         # No.
+ of steps along the x direction
+\end_layout
+
+\begin_layout LyX-Code
+Ny = 25         # No.
+ of steps along the y direction
+\end_layout
+
+\begin_layout LyX-Code
+radius = 0.35   # Radius of the wire loop
+\end_layout
+
+\begin_layout LyX-Code
+Niter = 1500    # No.
+ of iterations to find potential
+\end_layout
+
+\begin_layout LyX-Code
+errors = np.zeros(Niter)   # Error array is declared
+\end_layout
+
+\begin_layout Section
+The potential is intialised
+\end_layout
+
+\begin_layout Standard
+The array denoting the x and y coordinates of the plate is initialised and
+ using that, the 2D potential array is also initialised with zeros.
+ Then, the area covered by the ring is found (using where) and that part
+ is given the value 1 V.
+\end_layout
+
+\begin_layout LyX-Code
+x = np.linspace(-0.5,0.5,25)    # x coordinate array
+\end_layout
+
+\begin_layout LyX-Code
+y = np.linspace(0.5,-0.5,25)    # y coordinate array
+\end_layout
+
+\begin_layout LyX-Code
+X,Y = meshgrid(x,y)             # The 2D grid of x and y coordinates
+\end_layout
+
+\begin_layout LyX-Code
+phi = np.zeros((Nx,Ny))         # Potential is initialised with zeros
+\end_layout
+
+\begin_layout LyX-Code
+ii = where(X*X + Y*Y <= radius*radius)  # Area covered by ring is found
+\end_layout
+
+\begin_layout LyX-Code
+phi[ii] = 1.0                   # Area covered by ring is initialised with
+ 1 V
+\end_layout
+
+\begin_layout Standard
+Now, the contout plot of the potential is plotted with red dots marking
+ the region covered by the ring.
+\end_layout
+
+\begin_layout LyX-Code
+contour(X,Y,phi)
+\end_layout
+
+\begin_layout LyX-Code
+plot(x[ii[0]],y[ii[1]],'ro')
+\end_layout
+
+\begin_layout LyX-Code
+grid()
+\end_layout
+
+\begin_layout LyX-Code
+title('Contour plot of initial potential')
+\end_layout
+
+\begin_layout LyX-Code
+xlabel('x')
+\end_layout
+
+\begin_layout LyX-Code
+ylabel('y')
+\end_layout
+
+\begin_layout LyX-Code
+show()
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename initial_contour.png
+	scale 75
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Calculation of potential
+\end_layout
+
+\begin_layout Standard
+Now, the actual iteration is performed 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$Niter$
+\end_layout
+
+\end_inset
+
+ (1500) times and the potential is calculated at every point using the Laplace
+ equation and appropriate boundary conditions.
+ The laplace equation modified for use in a 2D array of potential values
+ ( in a computer program with discrete positions ) is:
+\begin_inset Formula 
+\[
+\phi_{i,j}=\frac{\phi_{i+1,j}+\phi_{i-1,j}+\phi_{i,j+1}+\phi_{i,j-1}}{4}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout LyX-Code
+newphi = np.zeros((Nx,Ny)) # This is to temporarily store the newly calculated
+ values so as to calculate error
+\end_layout
+
+\begin_layout LyX-Code
+for k in range(Niter):
+\end_layout
+
+\begin_layout LyX-Code
+    oldphi = phi.copy()    # Phi before iteration is stored to calculate
+ error
+\end_layout
+
+\begin_layout LyX-Code
+    newphi[1:-1,1:-1] = 0.25*(phi[1:-1,0:-2] + phi[1:-1,2:] + phi[0:-2,1:-1]
+ + phi[2:,1:-1])  # Laplace equation applied
+\end_layout
+
+\begin_layout LyX-Code
+    
+\end_layout
+
+\begin_layout LyX-Code
+    newphi[1:-1,0] = newphi[1:-1,1]         # Boundary conditions applied
+\end_layout
+
+\begin_layout LyX-Code
+    newphi[1:-1,Nx-1] = newphi[1:-1,Nx-2]
+\end_layout
+
+\begin_layout LyX-Code
+    newphi[0,1:-1] = newphi[1,1:-1]
+\end_layout
+
+\begin_layout LyX-Code
+    newphi[ii] = 1.0
+\end_layout
+
+\begin_layout LyX-Code
+    
+\end_layout
+
+\begin_layout LyX-Code
+    errors[k] = max(np.absolute(np.subtract(oldphi.flatten(),newphi.flatten())))
+   # Error calculated as maximum difference
+\end_layout
+
+\begin_layout LyX-Code
+    phi = newphi.copy()
+\end_layout
+
+\begin_layout Section
+Error plot
+\end_layout
+
+\begin_layout Standard
+The actual error calculated from the above loop is plotted as is, by sampling
+ every 50
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$^{th}$
+\end_layout
+
+\end_inset
+
+ point.
+ Then, in addition to that, two other lines are also plotted, the best fit
+ line taking all error values obtained and that by taking all error values
+ obtained after 500 iterations.
+ The formula used to calculate the best fit line is:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+y=A\exp^{Bx}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+where 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$y$
+\end_layout
+
+\end_inset
+
+ is the error, 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$x$
+\end_layout
+
+\end_inset
+
+ is the no.
+ of iterations and 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$A$
+\end_layout
+
+\end_inset
+
+ & 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$B$
+\end_layout
+
+\end_inset
+
+ are parameters.
+ This is converted to its corresponding log equation:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\log y=\log A+Bx
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+and solved using least squares approximation to get 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+log{A}$
+\end_layout
+
+\end_inset
+
+ & 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$B$
+\end_layout
+
+\end_inset
+
+, and the line thus obtained is plotted on the same plot.
+\end_layout
+
+\begin_layout LyX-Code
+# Best fit for all iterations
+\end_layout
+
+\begin_layout LyX-Code
+xError = np.linspace(1,Niter,1500)   # x Values for the equation
+\end_layout
+
+\begin_layout LyX-Code
+yError = np.log(errors)              # y values for equation
+\end_layout
+
+\begin_layout LyX-Code
+A=np.zeros((Niter,2))                # 2D matrix initialised
+\end_layout
+
+\begin_layout LyX-Code
+A[:,0] = 1
+\end_layout
+
+\begin_layout LyX-Code
+A[:,1] = xError
+\end_layout
+
+\begin_layout LyX-Code
+const = lstsq(A,yError)[0]           # parameters log(A) and B are found
+\end_layout
+
+\begin_layout LyX-Code
+yError = const[0] + const[1]*xError  # Above mentioned equation applied
+ to find best fit line
+\end_layout
+
+\begin_layout LyX-Code
+yError = np.exp(yError)
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+vspace{10pt}$
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout LyX-Code
+# Best fit for greater than 500 iterations
+\end_layout
+
+\begin_layout LyX-Code
+xError2 = np.linspace(501,Niter,1000)
+\end_layout
+
+\begin_layout LyX-Code
+yError2 = np.log(errors[500:])
+\end_layout
+
+\begin_layout LyX-Code
+B=np.zeros((Niter-500,2))
+\end_layout
+
+\begin_layout LyX-Code
+B[:,0] = 1
+\end_layout
+
+\begin_layout LyX-Code
+B[:,1] = xError2
+\end_layout
+
+\begin_layout LyX-Code
+const = lstsq(B,yError2)[0]
+\end_layout
+
+\begin_layout LyX-Code
+yError2 = const[0] + const[1]*xError2
+\end_layout
+
+\begin_layout LyX-Code
+yError2 = np.exp(yError2)
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+vspace{10pt}$
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout LyX-Code
+# Graph plotted
+\end_layout
+
+\begin_layout LyX-Code
+semilogy(np.arange(1,1501,50),errors[0::50],'ro')
+\end_layout
+
+\begin_layout LyX-Code
+plot(xError,yError)
+\end_layout
+
+\begin_layout LyX-Code
+plot(xError2, yError2)
+\end_layout
+
+\begin_layout LyX-Code
+grid()
+\end_layout
+
+\begin_layout LyX-Code
+title('Error plot')
+\end_layout
+
+\begin_layout LyX-Code
+xlabel('No.
+ of iterations')
+\end_layout
+
+\begin_layout LyX-Code
+ylabel('Error')
+\end_layout
+
+\begin_layout LyX-Code
+legend(('Calculated Error','Fit 1 (all iterations)','Fit 2 (>500 iterations)'))
+\end_layout
+
+\begin_layout LyX-Code
+show()
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename error.png
+	scale 75
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Thus, it is observed from the graph that, when all 1500 iterations are taken,
+ although the fit is good at larger iterations, at the smaller ones, the
+ actual calculated error vary significantly from the calculated best fit
+ line, whereas the line calculated for errors after 500 iterations fits
+ perfectly with the actual error values.
+\end_layout
+
+\begin_layout Section
+Potential Plots
+\end_layout
+
+\begin_layout Standard
+The potential obtained after applying the Laplace equation is now plotted
+ in a 3D surface plot so as to observe the variation of potential throughout
+ the plate.
+\end_layout
+
+\begin_layout LyX-Code
+fig1 = figure(4)
+\end_layout
+
+\begin_layout LyX-Code
+ax = p3.Axes3D(fig1)
+\end_layout
+
+\begin_layout LyX-Code
+title('The 3-D surface plot of the potential')
+\end_layout
+
+\begin_layout LyX-Code
+ax.set_xlabel('x')
+\end_layout
+
+\begin_layout LyX-Code
+ax.set_ylabel('y')
+\end_layout
+
+\begin_layout LyX-Code
+ax.set_zlabel('Potential $(
+\backslash
+phi)$')
+\end_layout
+
+\begin_layout LyX-Code
+surf = ax.plot_surface(X, Y, phi, rstride=1, cstride=1, cmap=cm.jet,linewidth=0,
+ antialiased=False)
+\end_layout
+
+\begin_layout LyX-Code
+show()
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename potential.png
+	scale 75
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Thus, from the surface plot, we see that potential is almost uniform (1
+ V) at the top half of the plate (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$y > 0.5$
+\end_layout
+
+\end_inset
+
+), whereas it decreases to 0 (ground) at the bottom half of the plate, as
+ expected, as the bottom half of the plate is grounded.
+\end_layout
+
+\begin_layout Standard
+Now, a contour plot of the potential is plotted marking the region covered
+ by the ring with red dots.
+\end_layout
+
+\begin_layout LyX-Code
+contour(x,y,phi)
+\end_layout
+
+\begin_layout LyX-Code
+plot(x[ii[0]],y[ii[1]],'ro')
+\end_layout
+
+\begin_layout LyX-Code
+xlabel('x')
+\end_layout
+
+\begin_layout LyX-Code
+ylabel('y')
+\end_layout
+
+\begin_layout LyX-Code
+title('Contour plot of final potential')
+\end_layout
+
+\begin_layout LyX-Code
+grid()
+\end_layout
+
+\begin_layout LyX-Code
+show()
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename final_contour.png
+	scale 75
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This shows that the contour lines are more dense in the region where the
+ plate is most nearest to ground.
+ This shows that maximum potential gradient occurs here and therefore current
+ flow is also maximum here.
+ Thus, in the temperature plot ( that is plotted subsequently ), this area
+ would be the hottest.
+ 
+\end_layout
+
+\begin_layout Section
+Current Density - Calculation and Plot
+\end_layout
+
+\begin_layout Standard
+From the above obtained values of 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+phi$
+\end_layout
+
+\end_inset
+
+, the current density (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$J$
+\end_layout
+
+\end_inset
+
+) is calculated.
+ Since, for knowing the trend of 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$J$
+\end_layout
+
+\end_inset
+
+ across the plate, its actual value is not needed, the value of conductivity
+ (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+sigma$
+\end_layout
+
+\end_inset
+
+) is taken as 1.
+ The equations used are:
+\begin_inset Formula 
+\[
+j_{x}=-\sigma\frac{\partial\phi}{\partial x}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+j_{y}=-\sigma\frac{\partial\phi}{\partial y}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout LyX-Code
+Jx = np.zeros((Nx,Ny))
+\end_layout
+
+\begin_layout LyX-Code
+Jy = np.zeros((Nx,Ny))
+\end_layout
+
+\begin_layout LyX-Code
+Jy[1:-1,1:-1] = 0.5*(phi[1:-1,2:] - phi[1:-1,0:-2])
+\end_layout
+
+\begin_layout LyX-Code
+Jx[1:-1,1:-1] = 0.5*(phi[2:,1:-1] - phi[0:-2,1:-1])
+\end_layout
+
+\begin_layout Standard
+Now, a quiver plot of the above calculated current density is drawn, showing
+ the direction and magnitude of current in the plate.
+\end_layout
+
+\begin_layout LyX-Code
+plot(x[ii[0]],y[ii[1]],'ro')
+\end_layout
+
+\begin_layout LyX-Code
+xlabel('x')
+\end_layout
+
+\begin_layout LyX-Code
+ylabel('y')
+\end_layout
+
+\begin_layout LyX-Code
+title('Vector plot of the current flow')
+\end_layout
+
+\begin_layout LyX-Code
+quiver(y,x,Jy[::-1,:],Jx[::-1,:])
+\end_layout
+
+\begin_layout LyX-Code
+# contour(x,y,phi)
+\end_layout
+
+\begin_layout LyX-Code
+show()
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename current.png
+	scale 75
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Thus, from the graph obtained, it is observed that, the current density
+ has the maximum magnitude and is most dense at the region around 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$x$
+\end_layout
+
+\end_inset
+
+ = 0 and 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$y$
+\end_layout
+
+\end_inset
+
+ < -0.35 (radius of the ring).
+ This is because, this region is the one nearest to the ground, and hence
+ has the maximum potential gradient and hence from its formula, 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$J$
+\end_layout
+
+\end_inset
+
+ would be maximum here.
+ Also, when the contour plot of 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+phi$
+\end_layout
+
+\end_inset
+
+ and the quiver plot of current is plotted together ( removing the comment
+ for contour() in above code ), it is seen that the current plot is perpendicula
+r to the potential plot which is as expected.
+ In a static situation, there should be no component of current parallel
+ to the conductor, and therefore the current would emerge from the conductor
+ perpendicular to it (as shown).
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename current_with_potential.png
+	scale 75
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Calculation of Temperature
+\end_layout
+
+\begin_layout Standard
+Now, to find which region gets heated up the most, the heat generated due
+ to current flow (ohmic loss = 
+\begin_inset Formula $\vec{J}.\overrightarrow{E}$
+\end_inset
+
+) is equated with the heat released corresponding to the temperature gradient
+ of the material.
+ Formula used is:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\nabla.\left(\kappa\nabla T\right)=q=\frac{1}{\sigma}\left|J\right|^{2}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout LyX-Code
+T = np.zeros((Nx,Ny))
+\end_layout
+
+\begin_layout LyX-Code
+T[:,:] = 300
+\end_layout
+
+\begin_layout LyX-Code
+sigma = 6*(10**7)   # Electrical conductivity of copper
+\end_layout
+
+\begin_layout LyX-Code
+kappa = 385         # Thermal conductivity of copper
+\end_layout
+
+\begin_layout LyX-Code
+for i in range(Niter):
+\end_layout
+
+\begin_layout LyX-Code
+    T[1:-1,1:-1] = 0.25*(T[1:-1,0:-2] + T[1:-1,2:] + T[0:-2,1:-1] + T[2:,1:-1]
+ + (((Jx**2)[1:-1,1:-1] + (Jy**2)[1:-1,1:-1])*sigma*(16*(10**-8)))/kappa)
+   # sigma is multiplied as it was not used in calculation of J earlier
+\end_layout
+
+\begin_layout LyX-Code
+    T[1:-1,0]=T[1:-1,1]
+\end_layout
+
+\begin_layout LyX-Code
+    T[1:-1,Nx-1]=T[1:-1,Nx-2]
+\end_layout
+
+\begin_layout LyX-Code
+    T[0,1:-1]=T[1,1:-1]
+\end_layout
+
+\begin_layout LyX-Code
+    T[ii] = 300.0
+\end_layout
+
+\begin_layout LyX-Code
+fig1=figure(4)
+\end_layout
+
+\begin_layout LyX-Code
+ax=p3.Axes3D(fig1)
+\end_layout
+
+\begin_layout LyX-Code
+title('The 3-D surface plot of the temperature')
+\end_layout
+
+\begin_layout LyX-Code
+ax.set_xlabel('x')
+\end_layout
+
+\begin_layout LyX-Code
+ax.set_ylabel('y')
+\end_layout
+
+\begin_layout LyX-Code
+ax.set_zlabel('Temperature')
+\end_layout
+
+\begin_layout LyX-Code
+ax.plot_surface(X, Y, T, rstride=1, cstride=1, cmap=cm.jet,linewidth=0, antialiase
+d=False)
+\end_layout
+
+\begin_layout LyX-Code
+show()
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename temperature.png
+	scale 60
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Inferences
+\end_layout
+
+\begin_layout Standard
+From all the above plots, we see that:
+\end_layout
+
+\begin_layout Enumerate
+The potential is almost uniform at the sides that are not grounded and inside
+ the ring.
+ This is expected, since no rigid boundary potentials are present, there
+ would be no current flow at those sides and hence, potential would be unifrom
+ in these areas.
+ Also, inside the ring, the potential is maintained at 1 V due to the boundary
+ of the ring.
+\end_layout
+
+\begin_layout Enumerate
+At the region of the plate between the closest point of the ring and the
+ ground, the potential gradient is maximum.
+ This is because potential goes from 1 V to 0 V in a small length.
+ Due to this, the current in this region is also maximum as current density
+ (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$J$
+\end_layout
+
+\end_inset
+
+) is directly proportional to magnitude of potential gradient.
+\end_layout
+
+\begin_layout Enumerate
+Also the direction of 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$J$
+\end_layout
+
+\end_inset
+
+, from the quiver plot, is seen to be perpendicular to the contour plot
+ of 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+phi$
+\end_layout
+
+\end_inset
+
+.
+ This is also as expected, as 
+\begin_inset Formula $j_{i}=-\sigma\frac{\partial\phi}{\partial i}$
+\end_inset
+
+, and therefore, the direction of the current would be in the direction
+ of decreasing potential, i.e, perpendicular to contour plot.
+ 
+\end_layout
+
+\begin_layout Enumerate
+From the temperature plot, it is seen that, the temperature is highest in
+ the region where current density is highest.
+ This is also expected as, ohmic loss is directly related to current and
+ as energy dissipated due to this ohmic loss increases, temperature in that
+ region would also increase.
+\end_layout
+
+\end_body
+\end_document

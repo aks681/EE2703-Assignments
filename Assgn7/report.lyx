@@ -1,0 +1,1876 @@
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 7page%
+\topmargin 5pheight%
+\rightmargin 7page%
+\bottommargin 5pheight%
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\listings_params "language=Python,basicstyle={\ttfamily},keywordstyle={\color{blue}},commentstyle={\color{magenta}\itshape},breaklines=true,stringstyle={\color{green}}"
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Report - Assignment 7
+\end_layout
+
+\begin_layout Author
+Akshay Anand (EE16B046)
+\end_layout
+
+\begin_layout Abstract
+In this week's assignment, the numerical tools available in 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$scipy.signal$
+\end_layout
+
+\end_inset
+
+ were used to analyse Linear Time-Invariant (LTI) systems.
+ Initially, a differential equation governing the motion of a sping with
+ an external driving force ( 
+\begin_inset Formula $\ddot{x}+2.25x=f\left(t\right)$
+\end_inset
+
+) was solved in the frequenecy domain using laplace transforms, the inverse
+ laplace transform for which was found using 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$scipy.signal.impulse$
+\end_layout
+
+\end_inset
+
+, after which the output was plotted.
+ Then, a driving force that decayed at a slower rate was used, output of
+ which was also plotted.
+ In the above examples, the system was in resonance ( natural frequency
+ of spring was same as that of driving force ).
+ Now output with 5 driving forces with different frequencies ( one in resonance
+ with system ) were used to find the output.
+ Then, a coupled spring problem ( with 2 differential equations connecting
+ 2 variables ) was solved and output plotted.
+ Finally, the transfer function for a series RLC circuit, when output was
+ taken across the capacitor, was found and bode plot plotted.
+ To this system, then an input with two frequency components were given
+ and output plot observed.
+\end_layout
+
+\begin_layout Section*
+Libraries Imported
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+import numpy as np
+\end_layout
+
+\begin_layout Plain Layout
+
+import scipy.signal as sp
+\end_layout
+
+\begin_layout Plain Layout
+
+import matplotlib.pyplot as plt
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Single Spring Problem
+\end_layout
+
+\begin_layout Standard
+Here, a single spring is excited with an external force 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$f(t)$
+\end_layout
+
+\end_inset
+
+.
+ The output was calculated in the frequency domain using laplace transforms.
+ Then, its inverse laplace transform is found using python (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$scipy.signal.impulse$
+\end_layout
+
+\end_inset
+
+).
+ The output so obtained is plotted.
+ The differential equation is:
+\begin_inset Formula 
+\[
+\ddot{x}+2.25x=f\left(t\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+where 
+\begin_inset Formula 
+\[
+f\left(t\right)=\cos\left(1.5t\right)e^{-0.5t}u_{0}\left(t\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+with initial conditions: 
+\begin_inset Formula $x\left(0\right)=0$
+\end_inset
+
+ and 
+\begin_inset Formula $\dot{x}(0)=0$
+\end_inset
+
+, for 
+\begin_inset Formula $0\leq t\leq50$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The laplace transform of the motion of the spring was found to be:
+\begin_inset Formula 
+\[
+X\left(s\right)=\frac{s+0.5}{\left(s^{2}+s+2.5\right)\left(s^{2}+2.25\right)}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+num = np.poly1d([1,0.5])   # numerator polynomial
+\end_layout
+
+\begin_layout Plain Layout
+
+den = np.polymul([1,1,2.5],[1,0,2.25]) # denominator polynomial
+\end_layout
+
+\begin_layout Plain Layout
+
+X1 = sp.lti(num,den)    # The polynomial fraction is converted to a frequency
+ domain representation
+\end_layout
+
+\begin_layout Plain Layout
+
+t = np.linspace(0.0,50.0,1001)  # The range of time is declared
+\end_layout
+
+\begin_layout Plain Layout
+
+t,x1 = sp.impulse(X1,None,t)   # The output is found as inverse laplace transform
+ of X
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.plot(t,x1)   # Output is plotted
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.xlabel('Time')
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.ylabel('Position')
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.title('Position vs time plot for a single spring')
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.grid()
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.show()
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Graph obtained was:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+vspace{5pt}$
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename spring_1.png
+	scale 70
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+vspace{7pt}$
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Decreasing rate of decay
+\end_layout
+
+\begin_layout Standard
+Now, the rate of decay of the forcing function is reduced i.e new forcing
+ function used is:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+f\left(t\right)=\cos\left(1.5t\right)e^{-0.05t}u_{0}\left(t\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+num = np.poly1d([1, 0.05])
+\end_layout
+
+\begin_layout Plain Layout
+
+den = np.polymul([1, 0.1, 2.2525],[1,0,2.25])
+\end_layout
+
+\begin_layout Plain Layout
+
+X2 = sp.lti(num,den)    # The polynomial fraction is converted to a frequency
+ domain representation
+\end_layout
+
+\begin_layout Plain Layout
+
+t = np.linspace(0.0,50.0,1001)  # The range of time is declared
+\end_layout
+
+\begin_layout Plain Layout
+
+t,x2 = sp.impulse(X2,None,t)  
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.plot(t,x2)   # Output is plotted
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.xlabel('Time')
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.ylabel('Position')
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.title('Position vs time plot for a single spring')
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.grid()
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.show()
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+vspace{7pt}$
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Here, though, the graph of output obtained is:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+vspace{7pt}$
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename spring_2.png
+	scale 70
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+vspace{70pt}$
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Plotting the above 2 graphs together, the plot obtained is:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+vspace{7pt}$
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename spring_combined.png
+	scale 75
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+vspace{7pt}$
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Thus, it is observed that because the forcing function decays at a lesser
+ rate, it takes longer for the second function to reach a steady value,
+ compared to the first one.
+ Also, since the forcing function has a numerically higher value for the
+ second case ( 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$e^{-0.05t} > e^{-0.5t}$
+\end_layout
+
+\end_inset
+
+, for 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$t>0$
+\end_layout
+
+\end_inset
+
+ ), the actual magnitude of oscillations are also greater for the second
+ one.
+\end_layout
+
+\begin_layout Subsection
+Varying forcing function frequency
+\end_layout
+
+\begin_layout Standard
+In this case, using the reduced decay rate of forcing function, the frequency
+ of this function is now varied from 1.4 to 1.6 in steps of 0.05.
+ Then, the waveform of the output wave is plotted and observed.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+fig, axes = plt.subplots(1, 5, figsize=(20, 7), sharey = True)  # A 1 x 5
+ subplot array is defined with common y - axis
+\end_layout
+
+\begin_layout Plain Layout
+
+i = 0
+\end_layout
+
+\begin_layout Plain Layout
+
+for w in np.linspace(1.4,1.6,5):   # Loop started
+\end_layout
+
+\begin_layout Plain Layout
+
+    num = np.poly1d([1])           # Numerator of transfer function
+\end_layout
+
+\begin_layout Plain Layout
+
+    den = np.poly1d([1,0,2.25])    # Denominator of tranfer functioin
+\end_layout
+
+\begin_layout Plain Layout
+
+    H = sp.lti(num,den)            # Transfer function calculated
+\end_layout
+
+\begin_layout Plain Layout
+
+    t = np.linspace(0.0,50.0,1001)  # Time range for graph
+\end_layout
+
+\begin_layout Plain Layout
+
+    f = np.cos(w*t)*np.exp(-0.05*t)  # Forcing function ( in time domain )
+\end_layout
+
+\begin_layout Plain Layout
+
+    t,y,svec=sp.lsim(H,f,t)        # Output wave found as convolution of
+ forcing function and impulse response
+\end_layout
+
+\begin_layout Plain Layout
+
+    axes[i].plot(t,y)    # Graph plotted
+\end_layout
+
+\begin_layout Plain Layout
+
+    axes[i].set_xlabel('Time')
+\end_layout
+
+\begin_layout Plain Layout
+
+    axes[i].set_ylabel('Position')
+\end_layout
+
+\begin_layout Plain Layout
+
+    axes[i].set_title('$
+\backslash
+omega$ = ' + str(w))
+\end_layout
+
+\begin_layout Plain Layout
+
+    axes[i].grid()
+\end_layout
+
+\begin_layout Plain Layout
+
+    i = i+1
+\end_layout
+
+\begin_layout Plain Layout
+
+# plt.legend(('$
+\backslash
+omega$ = 1.4','$
+\backslash
+omega$ = 1.45','$
+\backslash
+omega$ = 1.5','$
+\backslash
+omega$ = 1.55','$
+\backslash
+omega$ = 1.6'))
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.show()
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+vspace{10pt}$
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The 5 graphs obtained where:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename spring_loop.png
+	scale 60
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+vspace{10pt}$
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Plotting all of them together, the graph obtained is:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename springw.png
+	scale 60
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+vspace{5pt}$
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Thus, it is clearly seen that, at resonance ( system's natural frequency
+ = input forcing function frequency = 1.5 ), the amplitude of the output
+ wave is maximum, whereas at input frequencies of 1.55 and 1.45, outputs are
+ at similar lower magnitude with a phase shift and similarly for frequencies
+ of 1.4 and 1.6.
+ Also, it can be seen that the farther the input frequency is from the natural
+ frequency, the lower is the steady state amplitude of the output wave.
+\end_layout
+
+\begin_layout Section
+Coupled Spring Problem
+\end_layout
+
+\begin_layout Standard
+Now, a coupled spring problem is solved where the differential equation
+ governing the motion of two springs are coupled with each other ( i.e they
+ share common variables ).
+ So, they both are solved by ellimination of variables in the frequency
+ domain using the given initial conditions (
+\begin_inset Formula $x\left(0\right)=1,\dot{x}\left(0\right)=y\left(0\right)=\dot{y}(0)=0$
+\end_inset
+
+) and are then plotted in the time domain for 
+\begin_inset Formula $0\leq t\leq20$
+\end_inset
+
+.
+ The two differential equations are:
+\begin_inset Formula 
+\[
+\ddot{x}+\left(x-y\right)=0
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\ddot{y}+2\left(y-x\right)=0
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Solving the above 2, the laplace transforms obtained where:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+X\left(s\right)=\frac{s^{3}+2s}{s^{4}+3s^{2}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+Y\left(s\right)=\frac{2s}{s^{4}+3s^{2}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+num = np.poly1d([1, 0, 2, 0])   # Numerator of X(s)
+\end_layout
+
+\begin_layout Plain Layout
+
+den = np.poly1d([1, 0, 3, 0, 0])  # Denominator of X(s)
+\end_layout
+
+\begin_layout Plain Layout
+
+X = sp.lti(num,den)              # X(s) calculated
+\end_layout
+
+\begin_layout Plain Layout
+
+t,x = sp.impulse(X,None,T=np.linspace(0,20,1001))  # Time range for x plot
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+num = np.poly1d([2, 0]) # Numerator of Y(s)
+\end_layout
+
+\begin_layout Plain Layout
+
+den = np.poly1d([1,0,3,0,0])    # Denominator of Y(s)
+\end_layout
+
+\begin_layout Plain Layout
+
+Y = sp.lti(num,den)         # Y(s) calculated
+\end_layout
+
+\begin_layout Plain Layout
+
+t,y = sp.impulse(Y,None,T=np.linspace(0,20,1001))  # Time range for y plot
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.plot(t,x)
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.plot(t,y)
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.xlabel('Time')
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.ylabel('Position')
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.title('Position vs time plot for a coupled spring')
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.legend(('x(t)','y(t)'),bbox_to_anchor=(1, 1))
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.grid()
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.show()
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+vspace{5pt}$
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The graph obtained is:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+vspace{5pt}$
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename spring_coupled.png
+	scale 70
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+vspace{5pt}$
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Thus, from the graph, it is observed that 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$x(t)$
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$y(t)$
+\end_layout
+
+\end_inset
+
+ are 180
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$^{0}$
+\end_layout
+
+\end_inset
+
+ out of phase and that the latter has a larger amplitude.
+ Also, 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$x(0) = 1$
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$y(0) = 0$
+\end_layout
+
+\end_inset
+
+ from the graph, same as initial condition provided in the question.
+ Also, 
+\begin_inset Formula $\dot{x}(0)=0$
+\end_inset
+
+ and 
+\begin_inset Formula $\dot{y}(0)=0$
+\end_inset
+
+ from the graph as both plots start from the peak of a sinusoidal wave,
+ at which point the derivative is 0.
+\end_layout
+
+\begin_layout Section
+Series RLC circuit
+\end_layout
+
+\begin_layout Standard
+Now, a series RLC circuit ( with output taken across the capacitor ) is
+ modeled using its transfer function.
+ In such a circuit, the transfer function would be:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+H\left(s\right)=\frac{1}{s^{2}LC+sCR+1}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+with 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$L = 1
+\backslash
+mu H$
+\end_layout
+
+\end_inset
+
+, 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$C = 1
+\backslash
+mu F$
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$R = 100 
+\backslash
+Omega$
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+vspace{3pt}$
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Now, the Bode plot of this transfer function is drawn.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+num = np.poly1d([1])    # Numerator of transfer function
+\end_layout
+
+\begin_layout Plain Layout
+
+den = np.poly1d([10**(-12),10**(-4),1])   # Calculated denominator of transfer
+ function
+\end_layout
+
+\begin_layout Plain Layout
+
+H = sp.lti(num,den)
+\end_layout
+
+\begin_layout Plain Layout
+
+w,S,phi=H.bode()   # Bode plot values calculated
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+fig, axes = plt.subplots(2, 1, sharex = True)  # A 2 x 1 subplot array is
+ defined with common x-axis
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[0].semilogx(w,S)
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[0].set_ylabel('log of magnitude')
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[0].set_title('Magnitude Plot')
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[0].grid()
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].semilogx(w,phi)
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].set_xlabel('$
+\backslash
+omega$')
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].set_ylabel('phase')
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].set_title('Phase Plot')
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].grid()
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.show()
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+vspace{5pt}$
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename bode.png
+	scale 70
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+vspace{5pt}$
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+From the bode plot, it can be seen that the tranfer function has 2 poles
+ at around 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+omega = 10^4$
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+omega = 10^8$
+\end_layout
+
+\end_inset
+
+.
+ Solving the quadratic equation for the denominator of the transfer function
+ ( its roots will be poles for the overall function ) i.e 
+\begin_inset Formula $10^{-12}s^{2}+10^{-4}s+1=0$
+\end_inset
+
+, the 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$|s|$
+\end_layout
+
+\end_inset
+
+ values obtained for roots are 10001.0002 and 99989998.99979995 which are
+ approximately equal to 10
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$^4$
+\end_layout
+
+\end_inset
+
+ and 10
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$^8$
+\end_layout
+
+\end_inset
+
+ respectively.
+ Hence, the graph obtained is verified.
+\end_layout
+
+\begin_layout Subsection
+Input signal given to circuit
+\end_layout
+
+\begin_layout Standard
+Now, an input signal 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$v_i(t)$
+\end_layout
+
+\end_inset
+
+ is given to the circuit, and the output obtained (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$v_0(t)$
+\end_layout
+
+\end_inset
+
+) is found by convolution of the impulse response and the input signal using
+ 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$scipy.signal.lsim$
+\end_layout
+
+\end_inset
+
+, after which both the input and the output signals are plotted to compare
+ the two and hence note down the observations.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+v_{i}\left(t\right)=\cos\left(10^{3}t\right)u\left(t\right)-\cos\left(10^{6}t\right)u\left(t\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Since the network is a resistive circuit, the current ( and hence the voltage
+ ) at t = 0
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$^-$
+\end_layout
+
+\end_inset
+
+, would have decayed to 0.
+ Thus, 
+\begin_inset Formula $\dot{i}$
+\end_inset
+
+ of inductor and 
+\begin_inset Formula $\dot{v}$
+\end_inset
+
+ of capacitor would also be 0 initially.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+t = np.linspace(0,10*(10**(-3)),100001)   # Time is taken till 10ms with
+ 0.1us step-size
+\end_layout
+
+\begin_layout Plain Layout
+
+v_i = np.cos((10**3)*t) - np.cos((10**6)*t)  # Input signal is defined
+\end_layout
+
+\begin_layout Plain Layout
+
+time,v_0,vsec = sp.lsim(H,v_i,t)   # Output signal y found
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+fig, axes = plt.subplots(2, 1, figsize=(7, 7), sharex = True, sharey = True)
+  # A 2 x 1 subplot array is defined with common x- and y- axes
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[0].plot(time,v_0)
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[0].set_ylabel('Voltage (V)')
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[0].set_title('Voltage Plot of output')
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[0].set_xlabel('Time (s)')
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[0].grid()
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].plot(time,v_i)
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].set_ylabel('Voltage (V)')
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].set_title('Voltage Plot of input')
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].set_xlabel('Time (s)')
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].grid()
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.show()
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+vspace{5pt}$
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+The graphs obtained are:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+vspace{5pt}$
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename rlc.png
+	scale 70
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+From the bode plot of the impulse response, it can be seen that a frequency
+ of 10
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$^6$
+\end_layout
+
+\end_inset
+
+ would be more attenuated than 10
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$^3$
+\end_layout
+
+\end_inset
+
+, which is also observed in the graph of the output as it is seen that the
+ high frequency components of the input are attenuated significantly and
+ only the low frequency component is pronounced in the output.
+\end_layout
+
+\begin_layout Standard
+As a verification of this, when the input wave was changed to:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+v_{i}\left(t\right)=\cos\left(10^{3}t\right)u\left(t\right)-\cos\left(10^{12}t\right)u\left(t\right)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The graph obtained was:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename rlc_2.png
+	scale 70
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Thus, it can be seen that when a higher frequency component (10
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$^{12}$
+\end_layout
+
+\end_inset
+
+) was given as input, the output is smoother as this high frequency would
+ be attenuated more compared to 10
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$^6$
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+vspace{10pt}$
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Plotting for 
+\begin_inset Formula $0<t<30\mu s$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+t = np.linspace(0,30*(10**(-6)),100001)   # Time is taken till 30us
+\end_layout
+
+\begin_layout Plain Layout
+
+v_i = np.cos((10**3)*t) - np.cos((10**6)*t)  # Input signal is defined
+\end_layout
+
+\begin_layout Plain Layout
+
+time,v_0,vsec = sp.lsim(H,v_i,t)   # Output signal y found
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+fig, axes = plt.subplots(2, 1, figsize=(7, 7), sharex = True)  # A 2 x 1
+ subplot array is defined with common x- axis
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[0].plot(time,v_0)
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[0].set_ylabel('Voltage (V)')
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[0].set_title('Voltage Plot of output')
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[0].set_xlabel('Time (s)')
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[0].grid()
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].plot(time,v_i)
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].set_ylabel('Voltage (V)')
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].set_title('Voltage Plot of input')
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].set_xlabel('Time (s)')
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].grid()
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.show()
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename rlc_3.png
+	scale 70
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This part is the transient output of the system, where although the high
+ frequency component is getting attenuated, its not just the low frequency
+ component that is the output.
+ The output is a slowly increasing wave as it is in this initial time-period
+ that the inductor gets energized and the capacitor is getting charged.
+ Thus from the graph, it can be seen that when the input wave is increasing,
+ the output voltage has a higher slope ( as capacitor gets charged faster
+ ) and when input wave is decreasing ( with some extra current due to inductor
+ ), capacitor voltage almost remains constant.
+ 
+\end_layout
+
+\begin_layout Standard
+This pattern will repeat until the capacitor holds the peak value of the
+ low frequency component of the input, after which the initial graphs would
+ be observed.
+ The below graphs illustrate this as the output till 500
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+mu s$
+\end_layout
+
+\end_inset
+
+ is taken:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+vspace{5pt}$
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename rlc_4.png
+	scale 60
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Thus, after the capacitor has reached its peak value in steps, it starts
+ following the trend of the low frequency component of the input.
+\end_layout
+
+\end_body
+\end_document

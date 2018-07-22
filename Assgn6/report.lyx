@@ -1,0 +1,3318 @@
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\begin_modules
+algorithm2e
+noweb
+\end_modules
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 7page%
+\topmargin 5pheight%
+\rightmargin 7page%
+\bottommargin 5pheight%
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\listings_params "language=Python,basicstyle={\ttfamily},keywordstyle={\color{blue}},commentstyle={\color{magenta}\itshape},breaklines=true,stringstyle={\color{green}}"
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Report - Assignment 6
+\end_layout
+
+\begin_layout Author
+Akshay Anand (EE16B046)
+\end_layout
+
+\begin_layout Abstract
+In this week's assignment, basic python vector operations were used to simulate
+ the movement of an electron in a uniform electric field in a tubelight.
+ Inside the tubelight, due to the uniform electric field, electrons will
+ be constantly accelerating and colliding with other electrons.
+ Once they collide, all their energy is lost in the form of light.
+ This is plotted in a histogram plot as the number of photons emitted at
+ each location in the tubelight.
+ In addition to this, a phase-space plot of position vs velocity and the
+ population plot of electrons at each location using a histogram was also
+ plotted and observations noted.
+\end_layout
+
+\begin_layout Section*
+Libraries Used
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+import numpy as np    
+\end_layout
+
+\begin_layout Plain Layout
+
+import matplotlib.pyplot as plt
+\end_layout
+
+\begin_layout Plain Layout
+
+import pandas as pd    # pandas for showing in tabular form
+\end_layout
+
+\begin_layout Plain Layout
+
+import sys
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Variable and Vector Declaration
+\end_layout
+
+\begin_layout Standard
+First, the variables are initialized with the default values given in question.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+n = 100	   # Spatial grid size
+\end_layout
+
+\begin_layout Plain Layout
+
+M = 10	   # no.
+ of electrons injected per turn
+\end_layout
+
+\begin_layout Plain Layout
+
+Msig = 2   # standard deviation of the distribution electrons injected	
+\end_layout
+
+\begin_layout Plain Layout
+
+nk = 500   # no.
+ of turns to simulate
+\end_layout
+
+\begin_layout Plain Layout
+
+u0 = 7.0   # threshold velocity
+\end_layout
+
+\begin_layout Plain Layout
+
+p = 0.5   # probability that ionization will occur
+\end_layout
+
+\begin_layout Plain Layout
+
+seedValue = 2   # A seed for random number generator
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vspace{5pt}
+\end_layout
+
+\end_inset
+
+Now, a python dictionary is defined to hold the values received from the
+ commandline.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+args = sys.argv[1:]  # This is because argv[0] is the program name itself
+ which is not required
+\end_layout
+
+\begin_layout Plain Layout
+
+argList = {}         # Dictionary declared
+\end_layout
+
+\begin_layout Plain Layout
+
+for i in args:
+\end_layout
+
+\begin_layout Plain Layout
+
+	i = i.split('=')    # 'varname=value' string is split into varname and value
+\end_layout
+
+\begin_layout Plain Layout
+
+	argList[i[0]] = float(i[1])   # The dictionary is updated with values from
+ commandline
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vspace{5pt}
+\end_layout
+
+\end_inset
+
+ Now, from the values in the dictionary declared, the actual variable values
+ are updated with the values obtained from commandline
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+if 'n' in argList:
+\end_layout
+
+\begin_layout Plain Layout
+
+    n = argList['n']
+\end_layout
+
+\begin_layout Plain Layout
+
+if 'M' in argList:
+\end_layout
+
+\begin_layout Plain Layout
+
+    M = argList['M']
+\end_layout
+
+\begin_layout Plain Layout
+
+if 'nk' in argList:
+\end_layout
+
+\begin_layout Plain Layout
+
+    nk = argList['nk']
+\end_layout
+
+\begin_layout Plain Layout
+
+if 'u0' in argList:
+\end_layout
+
+\begin_layout Plain Layout
+
+    u0 = argList['u0']
+\end_layout
+
+\begin_layout Plain Layout
+
+if 'p' in argList:
+\end_layout
+
+\begin_layout Plain Layout
+
+    p = argList['p']
+\end_layout
+
+\begin_layout Plain Layout
+
+if 'Msig' in argList:
+\end_layout
+
+\begin_layout Plain Layout
+
+    Msig = argList['Msig']
+\end_layout
+
+\begin_layout Plain Layout
+
+if 'seed' in argList:
+\end_layout
+
+\begin_layout Plain Layout
+
+    seedValue = argList['seed']
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vspace{10pt}
+\end_layout
+
+\end_inset
+
+The vectors and lists that actually hold the data related to the electrons
+ are now defined.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+xx = np.zeros(n*M)  # electron position
+\end_layout
+
+\begin_layout Plain Layout
+
+u = np.zeros(n*M)   # electron velocity
+\end_layout
+
+\begin_layout Plain Layout
+
+dx = np.zeros(n*M)  # electron displacement
+\end_layout
+
+\begin_layout Plain Layout
+
+np.random.seed((int)(seedValue))   # A seed given so that uniform numbers
+ results across runs for the random values generated in the code
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+I = []  # This is used to store the photons generated at each location in
+ each turn
+\end_layout
+
+\begin_layout Plain Layout
+
+X = []  # This stores the position of every electron after each turn
+\end_layout
+
+\begin_layout Plain Layout
+
+V = []  # Stores the velocity of the electron after each turn
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vspace{10pt}
+\end_layout
+
+\end_inset
+
+ The last 3 are lists as their lengths are not known beforehand and the
+ lists are appended with elements as the main loop progresses.
+\end_layout
+
+\begin_layout Section
+Simulation Loop
+\end_layout
+
+\begin_layout Standard
+The main loop is as follows:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+ii = []
+\end_layout
+
+\begin_layout Plain Layout
+
+for k in range(1,nk):
+\end_layout
+
+\begin_layout Plain Layout
+
+    dx[ii] = u[ii] + 0.5 
+\end_layout
+
+\begin_layout Plain Layout
+
+    xx[ii] = xx[ii] + dx[ii]
+\end_layout
+
+\begin_layout Plain Layout
+
+    u[ii] = u[ii] + 1.0
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\end_layout
+
+\begin_layout Plain Layout
+
+    jj = np.where(xx >ii = [] n)[0]
+\end_layout
+
+\begin_layout Plain Layout
+
+    dx[jj] = 0.0
+\end_layout
+
+\begin_layout Plain Layout
+
+    xx[jj] = 0.0
+\end_layout
+
+\begin_layout Plain Layout
+
+    u[jj] = 0.0
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\end_layout
+
+\begin_layout Plain Layout
+
+    kk = np.where( u >= u0 )[0]
+\end_layout
+
+\begin_layout Plain Layout
+
+    ll = np.where(np.random.rand(len(kk)) <= p)
+\end_layout
+
+\begin_layout Plain Layout
+
+    kl = kk[ll]
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+    t = np.random.rand(1)[0]
+\end_layout
+
+\begin_layout Plain Layout
+
+    xx[kl] = xx[kl] - dx[kl]
+\end_layout
+
+\begin_layout Plain Layout
+
+    u[kl] = u[kl] - 1.0
+\end_layout
+
+\begin_layout Plain Layout
+
+    xx[kl] = xx[kl] + u[kl]*t + 0.5*t*t
+\end_layout
+
+\begin_layout Plain Layout
+
+    u[kl] = 0.0
+\end_layout
+
+\begin_layout Plain Layout
+
+    I.extend(xx[kl].tolist())
+\end_layout
+
+\begin_layout Plain Layout
+
+    
+\end_layout
+
+\begin_layout Plain Layout
+
+    m = np.random.randn()*Msig + M     
+\end_layout
+
+\begin_layout Plain Layout
+
+    pos = np.where( xx == 0)[0]
+\end_layout
+
+\begin_layout Plain Layout
+
+    end = min(len(pos),(int)(m))
+\end_layout
+
+\begin_layout Plain Layout
+
+    xx[pos[0:end]] = 1.0
+\end_layout
+
+\begin_layout Plain Layout
+
+    u[pos[0:end]] = 0.0
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+    ii = np.where(xx > 0)[0]
+\end_layout
+
+\begin_layout Plain Layout
+
+    X.extend(xx[ii].tolist())
+\end_layout
+
+\begin_layout Plain Layout
+
+    V.extend(u[ii].tolist())
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+Breaking it down:
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+ii = []
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$ii$
+\end_layout
+
+\end_inset
+
+ stores the list of indices of electrons that are actually in the tubelight
+ i.e 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$0 < xx[ii] < n$
+\end_layout
+
+\end_inset
+
+.
+ This values is calculated once at the ending of the loop.
+ Hence, that value would be the same for the beginning of the next loop.
+ So, to initialize it for the 1
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$^{st}$
+\end_layout
+
+\end_inset
+
+ iteration, it is given an empty list as initially 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$xx$
+\end_layout
+
+\end_inset
+
+ is completely 0 and hence has no value greater than 0.
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+dx[ii] = u[ii] + 0.5       # Line 1
+\end_layout
+
+\begin_layout Plain Layout
+
+xx[ii] = xx[ii] + dx[ii]   # Line 2
+\end_layout
+
+\begin_layout Plain Layout
+
+u[ii] = u[ii] + 1.0        # Line 3
+\end_layout
+
+\end_inset
+
+This is where the first updation takes place.
+ The displacement at the i
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$^{th}$
+\end_layout
+
+\end_inset
+
+ iteration is given by the formula:
+\begin_inset Formula 
+\[
+dx_{i}=u_{i}\Delta t+\frac{1}{2}a(\Delta t)^{2}=u_{i}+0.5
+\]
+
+\end_inset
+
+In this, acceleration (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$a$
+\end_layout
+
+\end_inset
+
+) is taken as 1 and the time interval of each iteration is also taken as
+ 1 (hence Line 1).
+ From the displacement, we can calculate the new position of the electron
+ as the displacement added to the old position (hence Line 2).
+ The new velocity of the electron (provided no collision) is calculated
+ by the equation:
+\begin_inset Formula 
+\[
+u_{i}=u_{i-1}+a\Delta t
+\]
+
+\end_inset
+
+Here, both 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$a$
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+Delta t$
+\end_layout
+
+\end_inset
+
+ are 1 ( hence Line 3).
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+jj = np.where(xx > n)[0]
+\end_layout
+
+\begin_layout Plain Layout
+
+dx[jj] = 0.0
+\end_layout
+
+\begin_layout Plain Layout
+
+xx[jj] = 0.0
+\end_layout
+
+\begin_layout Plain Layout
+
+u[jj] = 0.0
+\end_layout
+
+\end_inset
+
+Here, the electrons which went past the tubelight (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$x_i > n$
+\end_layout
+
+\end_inset
+
+) are identified and their displacement, velocity and position are reset
+ to 0.
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+kk = np.where( u >= u0 )[0]
+\end_layout
+
+\begin_layout Plain Layout
+
+ll = np.where(np.random.rand(len(kk)) <= p)
+\end_layout
+
+\begin_layout Plain Layout
+
+kl = kk[ll]
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$kk$
+\end_layout
+
+\end_inset
+
+ contains the list of electrons whose velocities are greater than the threshold
+ velocity (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$u_0$
+\end_layout
+
+\end_inset
+
+).
+ From this, a uniform distribution of random numbers, between 0 and 1, of
+ length that of 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$kk$
+\end_layout
+
+\end_inset
+
+ is created and those indices are chosen which correspond to a random number
+ less than 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$p$
+\end_layout
+
+\end_inset
+
+.
+ These list of indices are now stored in vector 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$kl$
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+t = np.random.rand(1)[0]
+\end_layout
+
+\begin_layout Plain Layout
+
+xx[kl] = xx[kl] - dx[kl]
+\end_layout
+
+\begin_layout Plain Layout
+
+u[kl] = u[kl] - 1.0
+\end_layout
+
+\begin_layout Plain Layout
+
+xx[kl] = xx[kl] + u[kl]*t + 0.5*t*t
+\end_layout
+
+\begin_layout Plain Layout
+
+u[kl] = 0.0
+\end_layout
+
+\begin_layout Plain Layout
+
+I.extend(xx[kl].tolist())
+\end_layout
+
+\end_inset
+
+In the question, the collision location was considered to be a random variable
+ and the final location of the electron was calculated using that assumption,
+ but a more accurate assumption is that the time (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$t$
+\end_layout
+
+\end_inset
+
+) of collision of an electron is a uniformly distributed random variable
+ from 0 to 1 (as 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$
+\backslash
+Delta t$
+\end_layout
+
+\end_inset
+
+ was considered to be 1 before).
+ Hence, in this code, 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$t$
+\end_layout
+
+\end_inset
+
+ is taken as a uniformly distributed random number between 0 and 1.
+ Then, the position and velocity of all colliding electrons are reset to
+ their values before this iteration ( by subtracting displacement for position
+ and subtracting 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$a
+\backslash
+Delta t = 1$
+\end_layout
+
+\end_inset
+
+ for velocity).
+ Then, using the equation:
+\begin_inset Formula 
+\[
+x_{i}=x_{i-1}+u_{i-1}\Delta t+\frac{1}{2}a(\Delta t)^{2}
+\]
+
+\end_inset
+
+The actual final position of all electrons after collision is calculated,
+ after which the velocities of these collided electrons are set to 0.
+ As these electrons underwent collision and went to rest, they would emit
+ photons.
+ These photons ( 1 per electron ) are appended to the 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$I$
+\end_layout
+
+\end_inset
+
+ list.
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+m = np.random.randn()*Msig + M     
+\end_layout
+
+\begin_layout Plain Layout
+
+ll = np.where(xx == 0)[0]
+\end_layout
+
+\begin_layout Plain Layout
+
+maxElec = min(len(ll),(int)(m))
+\end_layout
+
+\begin_layout Plain Layout
+
+xx[ll[0:maxElec]] = 1.0
+\end_layout
+
+\begin_layout Plain Layout
+
+u[ll[0:maxElec]] = 0.0
+\end_layout
+
+\end_inset
+
+Now, after this turn is over, new electrons have to be injected for the
+ next turn.
+ For this, the actual number of injected electrons (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$m$
+\end_layout
+
+\end_inset
+
+) is calculated as standard deviation of no.
+ of electrons (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$Msig$
+\end_layout
+
+\end_inset
+
+), multiplied by a normally distributed random number (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$np.random.randn()$
+\end_layout
+
+\end_inset
+
+) added to the mean of number of electrons injected (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$M$
+\end_layout
+
+\end_inset
+
+).
+ For injecting these electrons, free locations in tubelight have to be found,
+ which are the locations stored in 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$ll$
+\end_layout
+
+\end_inset
+
+ (the indices where electron position is 0 i.e free electrons outside the
+ tubelight).
+ Thus, the maximum no.
+ of electrons that can be injected is the minimum of free spaces available
+ and 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$m$
+\end_layout
+
+\end_inset
+
+, stored in 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$maxElec$
+\end_layout
+
+\end_inset
+
+.
+ Now, the electrons corresponding to the first 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$maxElec$
+\end_layout
+
+\end_inset
+
+ indices in 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$ll$
+\end_layout
+
+\end_inset
+
+ are injected at position 1 with velocity 0.
+\end_layout
+
+\begin_layout Enumerate
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+ii = np.where(xx > 0)[0]
+\end_layout
+
+\begin_layout Plain Layout
+
+X.extend(xx[ii].tolist())
+\end_layout
+
+\begin_layout Plain Layout
+
+V.extend(u[ii].tolist())
+\end_layout
+
+\end_inset
+
+Now, the indices of electrons which are inside the tubelight are found and
+ stored in 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$ii$
+\end_layout
+
+\end_inset
+
+ ( less than 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$n$
+\end_layout
+
+\end_inset
+
+ condition is not required as all electrons at positions greater than 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$n$
+\end_layout
+
+\end_inset
+
+ are reset to 0 in the beginning of the loop ).
+ The position and velocity corresponding to these electrons are now appended
+ to the 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$X$
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$V$
+\end_layout
+
+\end_inset
+
+ list.
+ This 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$ii$
+\end_layout
+
+\end_inset
+
+, found here can be used for the next iteration as well, as 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$xx$
+\end_layout
+
+\end_inset
+
+ doesn't change in this time period.
+\end_layout
+
+\begin_layout Section
+Observations
+\end_layout
+
+\begin_layout Subsection
+Population Plots
+\end_layout
+
+\begin_layout Standard
+First, the electron density along the tubelight is plotted.
+ This is done by plotting a population plot of 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$X$
+\end_layout
+
+\end_inset
+
+ using histograms.
+ Second, a plot of the light intensity emitted at various locations is done
+ by plotting a population plot of 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$I$
+\end_layout
+
+\end_inset
+
+ using a histogram.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+# A 1 row 2 column subplot grid is declared
+\end_layout
+
+\begin_layout Plain Layout
+
+fig, axes = plt.subplots(1, 2, figsize=(20, 7)) 
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+# Population plot for electron density
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[0].hist(X,histtype='bar',range=(10,n), bins=np.arange(1,n,n/100),ec='black',a
+lpha=0.5) 
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[0].set_title('Population Plot')
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[0].set_xlabel('x')
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[0].set_ylabel('No.
+ of electrons')
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+# Population plot for intensity of emitted light
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].hist(I,histtype='bar',range=(10,n), bins=np.arange(1,n,n/100),ec='black',a
+lpha=0.5)
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].set_title('Intensity Plot')
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].set_xlabel('x')
+\end_layout
+
+\begin_layout Plain Layout
+
+axes[1].set_ylabel('No.
+ of photons emitted ($
+\backslash
+propto$ Intensity)')
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.show()
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+vspace{5pt}
+\end_layout
+
+\end_inset
+
+ The plot obtained is:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename histograms.png
+	width 90page%
+	height 30pheight%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Tabular representation of intensities
+\end_layout
+
+\begin_layout Standard
+The data from the histogram is copied into two variables 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$bins$
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$count$
+\end_layout
+
+\end_inset
+
+, from which, 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$xpos$
+\end_layout
+
+\end_inset
+
+ is obtained as mean of bin end-points after which this 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$xpos$
+\end_layout
+
+\end_inset
+
+ is tabulated against its corresponding population count.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+bins = plt.hist(I,bins=np.arange(1,n,n/100))[1]    # Bin positions are obtained
+\end_layout
+
+\begin_layout Plain Layout
+
+count = plt.hist(I,bins=np.arange(1,n,n/100))[0]   # Population counts obtained
+\end_layout
+
+\begin_layout Plain Layout
+
+xpos = 0.5*(bins[0:-1] + bins[1:])     # As no.
+ of end-points of bins would be 1 more than actual no.
+ of bins, the mean of bin end-points are used to get population of count
+ a particular bin
+\end_layout
+
+\begin_layout Plain Layout
+
+df = pd.DataFrame()   # A pandas dataframe is initialized to do the tabular
+ plotting of values.
+\end_layout
+
+\begin_layout Plain Layout
+
+df['Intensity'] = xpos
+\end_layout
+
+\begin_layout Plain Layout
+
+df['Count'] = count
+\end_layout
+
+\begin_layout Plain Layout
+
+print (df)
+\end_layout
+
+\end_inset
+
+Output obtained:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Tabular
+<lyxtabular version="3" rows="59" columns="3">
+<features tabularvalignment="middle">
+<column alignment="left" valignment="top" width="0pt">
+<column alignment="left" valignment="top" width="0pt">
+<column alignment="left" valignment="top" width="0pt">
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Intensity
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Count
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+4.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+4
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+5.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+6.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+6
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+7.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+7
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+8.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+8
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+9.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+9
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+10.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+10
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+11.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+11
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+12.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+12
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+13.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+13
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+14.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+14
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+15.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+15
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+16.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+16
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+17.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+17
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+18.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+18
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+19.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+438.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+19
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+20.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+408.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+20
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+21.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+401.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+21
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+22.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+306.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+22
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+23.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+265.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+23
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+24.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+349.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+24
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+25.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+319.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+25
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+26.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+172.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+26
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+27.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+200.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+27
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+28.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+147.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+28
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+29.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+155.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+29
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+30.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+138.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+30
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+31.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+151.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+31
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+32.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+161.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+32
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+33.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+92.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+33
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+34.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+64.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+34
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+35.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+77.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+35
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+36.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+68.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+36
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+37.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+78.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+37
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+38.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+103.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+38
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+39.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+144.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+..
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+....
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+....
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+80
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+81.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+167.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+81
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+82.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+126.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+82
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+83.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+178.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+83
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+84.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+120.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+84
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+85.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+155.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+85
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+86.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+179.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+86
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+87.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+123.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+87
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+88.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+159.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+88
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+89.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+170.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+89
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+90.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+135.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+90
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+91.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+175.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+91
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+92.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+157.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+92
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+93.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+146.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+93
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+94.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+115.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+94
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+95.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+85.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+95
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+96.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+64.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+96
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+97.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+51.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+97
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+98.5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+19.0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Phase space plot
+\end_layout
+
+\begin_layout Standard
+An electron phase space plot is plotted to know the position and corresponding
+ velocities of electrons as they go through the tubelight.
+ This is observed by plotting 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$X$
+\end_layout
+
+\end_inset
+
+ against 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+$V$
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+plt.plot(X,V,'x')
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.title('Electron phase space')
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.xlabel('x')
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.ylabel('velocity')
+\end_layout
+
+\begin_layout Plain Layout
+
+plt.show()
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename phase_space.png
+	scale 60
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Conclusion and Inferences
+\end_layout
+
+\end_body
+\end_document
